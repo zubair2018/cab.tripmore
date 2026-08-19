@@ -1,48 +1,89 @@
-# Tripmore Cab Booking Prototype
+# TripMore Cabs
 
-A polished frontend prototype for the Tripmore transport booking flow. It covers local cab bookings only; trip/package booking is intentionally out of scope for this version.
+### Travel through Kashmir. Leave the journey to us.
 
-## Run locally
+TripMore Cabs is a dedicated cab and transport service built for discovering Kashmir with comfort, reliability, and confidence.
 
-1. Install [Node.js](https://nodejs.org/) (version 18 or newer).
-2. Open this folder in VS Code or a terminal.
-3. Run `npm install`.
-4. Run `npm run dev` and open the local address shown.
+From the moment a journey begins in Srinagar to the valleys, lakes, mountains, and destinations beyond, TripMore Cabs is designed to make travelling across Kashmir simple and dependable. Whether it is a peaceful day trip to Pahalgam, an escape to Gulmarg, a visit to Sonamarg, or a longer journey across the valley, TripMore connects travellers with comfortable transportation built around their plans.
 
-For a production build, use `npm run build`.
+We believe that travelling is more than getting from one place to another. It is about enjoying the road, discovering new places, spending time with the people who matter, and experiencing Kashmir without worrying about the journey.
 
-## Folder structure
+TripMore Cabs brings that idea together through a modern booking experience where travellers can explore destinations, choose their preferred vehicle, plan their journey, and request a cab with ease.
 
-- `src/App.jsx` — connects the booking screens and holds the page state.
-- `src/components/` — small reusable UI pieces: header, vehicle cards, fare summary, itinerary, and customer form.
-- `src/data/vehicles.js` — tour names and all vehicle prices. Change the price table here.
-- `src/utils/calculateFare.js` — all fare rules and Indian currency formatting. Change fare rules here.
-- `src/services/firebase.js` — Firebase project configuration from environment variables.
-- `src/services/bookings.js` — Firestore booking creation and live dashboard subscription.
-- `src/components/AdminPage.jsx` — protected company login and dashboard entry point.
-- `firestore.rules` — Firestore access rules for public booking creation and admin-only reads and pricing changes.
-- `src/styles/global.css` — responsive visual styling for the entire site.
+---
 
-## Fare rules included
+## Explore Kashmir, Your Way
 
-| Tour | Sedan | Innova | Tempo Traveller | Urbania |
-| --- | ---: | ---: | ---: | ---: |
-| Srinagar to Pahalgam | ₹3,500 | ₹4,000 | ₹5,500 | ₹7,000 |
-| Srinagar to Gulmarg | ₹3,000 | ₹3,500 | ₹5,000 | ₹6,000 |
-| Srinagar to Sonamarg | ₹3,500 | ₹4,000 | ₹5,500 | ₹7,000 |
+Kashmir is a land of changing landscapes.
 
-The total is the selected tour price multiplied by the number of tour days. There are no extra surcharges.
+From the streets of Srinagar to the green meadows of Pahalgam, the slopes of Gulmarg, and the dramatic mountains of Sonamarg, every route offers something different.
 
-## Firebase setup
+TripMore Cabs is built to make those journeys easier.
 
-1. Create a Firebase project and a Firestore database in the Firebase Console.
-2. Copy `.env.example` to `.env`.
-3. Copy the Web App configuration values from Firebase into `.env`.
-4. Open **Build → Authentication → Sign-in method**, enable **Email/Password**, and create a company user under the **Users** tab.
-5. Create an `admins/{userId}` document with `role: "admin"` and `active: true` for each dashboard user.
-6. Copy the contents of `firestore.rules` into **Firestore Database → Rules** and publish them.
-7. Run `npm run dev`, open `/admin`, and sign in with the authorized company user.
+Whether you're travelling for a day, exploring with family, travelling with friends, or simply looking for a comfortable ride through the valley, TripMore is designed around the traveller.
 
-The dashboard login protects booking reads; create a separate company user instead of sharing a personal Firebase account. The published prices are kept in `src/data/vehicles.js`.
+**Your destination. Your journey. Your Kashmir.**
 
-Bookings are saved in the `bookings` collection. Payment gateway webhooks should update `paymentStatus`, `paymentId`, and `paidAt`. A Firebase Cloud Function should then send the customer and company email/WhatsApp messages and update the four notification status fields.
+---
+
+## More Than a Cab
+
+TripMore Cabs is built around three simple ideas:
+
+**Comfort.  
+Transparency.  
+Trust.**
+
+Travellers should know where they are going, what vehicle they are choosing, and what their journey costs before they begin.
+
+The experience is designed to remove unnecessary complexity and make booking transportation feel as natural as planning the trip itself.
+
+---
+
+## Built for Kashmir
+
+Kashmir isn't just a location on a map.
+
+It is winding mountain roads, quiet villages, crowded markets, snow-covered peaks, green valleys, lakes, rivers, and countless journeys between them.
+
+TripMore Cabs is created with that reality in mind — a transport experience designed around the destinations and travel patterns of Kashmir.
+
+From local journeys to popular tourist routes, TripMore aims to make moving through the valley easier for both visitors and local travellers.
+
+---
+
+## The TripMore Experience
+
+A journey with TripMore begins before the cab arrives.
+
+Choose your route.  
+Choose your vehicle.  
+Plan your days.  
+Make your booking.  
+Then enjoy the journey.
+
+Because the best journeys aren't measured only by the destination.
+
+They're remembered by everything you see along the way.
+
+---
+
+## Our Vision
+
+TripMore aims to become a trusted name in travel and transportation across Kashmir.
+
+A platform where discovering Kashmir and arranging transportation come together naturally.
+
+Today, it begins with cabs.
+
+Tomorrow, the journey goes much further.
+
+---
+
+### TripMore Cabs
+
+**Discover Kashmir.  
+Travel Comfortably.  
+Go Further.**
+
+© TripMore

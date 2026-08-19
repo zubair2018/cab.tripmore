@@ -161,10 +161,8 @@ export default function Dashboard({
     const usedByTour =
       catalog.tours.some(
         (tour) =>
-          (
-            tour.origin ||
-            'Srinagar'
-          ) === place ||
+          (tour.origin ||
+            'Srinagar') === place ||
           tour.destination ===
             place,
       )
@@ -317,6 +315,11 @@ export default function Dashboard({
 
   return (
     <main className="dashboard-page">
+
+      {/* ======================
+          DASHBOARD HEADER
+      ======================= */}
+
       <header className="dashboard-header">
         <div>
           <p className="eyebrow">
@@ -342,6 +345,11 @@ export default function Dashboard({
           Back to website
         </button>
       </header>
+
+
+      {/* ======================
+          DASHBOARD STATS
+      ======================= */}
 
       <section className="dashboard-stats">
         <Stat
@@ -375,26 +383,92 @@ export default function Dashboard({
         />
       </section>
 
+
+      {/* ======================
+          CATALOG ERROR
+      ======================= */}
+
       {catalogError && (
         <div className="catalog-error">
           {catalogError}
         </div>
       )}
 
-      {/* ======================
-          PLACES
-      ======================= */}
 
-      <PlacesManager
-        places={catalog.places}
-        saving={saving}
-        onAdd={addPlace}
-        onDelete={deletePlace}
-      />
+      {/* =================================================
+          1. RECENT BOOKINGS
+      ================================================= */}
 
-      {/* ======================
-          TOURS
-      ======================= */}
+      <section className="dashboard-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">
+              BOOKING RECORDS
+            </p>
+
+            <h2>
+              Recent bookings
+            </h2>
+          </div>
+
+          <span>
+            {bookings.length}{' '}
+            records
+          </span>
+        </div>
+
+        {bookings.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <div className="dashboard-scroll">
+            <table className="dashboard-table booking-table">
+              <thead>
+                <tr>
+                  <th>
+                    Booking
+                  </th>
+
+                  <th>
+                    Customer
+                  </th>
+
+                  <th>
+                    Journey
+                  </th>
+
+                  <th>
+                    Fare
+                  </th>
+
+                  <th>
+                    Payment
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {bookings.map(
+                  (booking) => (
+                    <BookingRow
+                      key={
+                        booking.id
+                      }
+                      booking={
+                        booking
+                      }
+                    />
+                  ),
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+
+      {/* =================================================
+          2. TOURS & PRICES
+      ================================================= */}
 
       <section className="dashboard-section">
         <div className="section-heading">
@@ -470,78 +544,22 @@ export default function Dashboard({
         </div>
       </section>
 
-      {/* ======================
-          BOOKINGS
-      ======================= */}
 
-      <section className="dashboard-section">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">
-              BOOKING RECORDS
-            </p>
+      {/* =================================================
+          3. PLACES
+      ================================================= */}
 
-            <h2>
-              Recent bookings
-            </h2>
-          </div>
+      <PlacesManager
+        places={catalog.places}
+        saving={saving}
+        onAdd={addPlace}
+        onDelete={deletePlace}
+      />
 
-          <span>
-            {bookings.length}{' '}
-            records
-          </span>
-        </div>
-
-        {bookings.length === 0 ? (
-          <EmptyState />
-        ) : (
-          <div className="dashboard-scroll">
-            <table className="dashboard-table booking-table">
-              <thead>
-                <tr>
-                  <th>
-                    Booking
-                  </th>
-
-                  <th>
-                    Customer
-                  </th>
-
-                  <th>
-                    Journey
-                  </th>
-
-                  <th>
-                    Fare
-                  </th>
-
-                  <th>
-                    Payment
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {bookings.map(
-                  (booking) => (
-                    <BookingRow
-                      key={
-                        booking.id
-                      }
-                      booking={
-                        booking
-                      }
-                    />
-                  ),
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
     </main>
   )
 }
+
 
 /* =================================
    PLACES MANAGER
@@ -630,6 +648,7 @@ function PlacesManager({
     </section>
   )
 }
+
 
 /* =================================
    ADD TOUR FORM
@@ -874,6 +893,7 @@ function AddTourForm({
   )
 }
 
+
 /* =================================
    TOUR PRICE ROW
 ================================= */
@@ -991,6 +1011,7 @@ function TourPriceRow({
   )
 }
 
+
 /* =================================
    DASHBOARD HELPERS
 ================================= */
@@ -1016,6 +1037,7 @@ function Stat({
     </article>
   )
 }
+
 
 function BookingRow({
   booking,
@@ -1104,6 +1126,7 @@ function BookingRow({
   )
 }
 
+
 function EmptyState() {
   return (
     <div className="dashboard-empty">
@@ -1118,6 +1141,7 @@ function EmptyState() {
     </div>
   )
 }
+
 
 function formatDate(value) {
   if (!value) {
@@ -1137,6 +1161,11 @@ function formatDate(value) {
         'en-IN',
       )
 }
+
+
+/* =================================
+   DASHBOARD LOGIN
+================================= */
 
 function DashboardLogin({
   onBack,

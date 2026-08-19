@@ -1,6 +1,5 @@
 import {
   useEffect,
-  useMemo,
   useState,
 } from 'react'
 
@@ -96,64 +95,13 @@ export default function BookingDialog({
   }, [])
 
   /*
-   * Convert the Firebase catalog
-   * into the same vehicle structure
-   * already used by the application.
-   */
-  const vehicles =
-    useMemo(() => {
-      return defaultVehicles.map(
-        (vehicleItem) => ({
-          ...vehicleItem,
-
-          prices:
-            Object.fromEntries(
-              catalog.tours.map(
-                (tourItem) => [
-                  tourItem.id,
-
-                  Number(
-                    tourItem
-                      .prices?.[
-                      vehicleItem
-                        .id
-                    ] || 0,
-                  ),
-                ],
-              ),
-            ),
-        }),
-      )
-    }, [
-      catalog.tours,
-    ])
-
-  /*
-   * Keep selected vehicle synced
-   * with the updated vehicle list.
-   */
-  useEffect(() => {
-    const updatedVehicle =
-      vehicles.find(
-        (item) =>
-          item.id ===
-          vehicle.id,
-      )
-
-    if (updatedVehicle) {
-      setVehicle(
-        updatedVehicle,
-      )
-    }
-  }, [
-    vehicles,
-    vehicle.id,
-  ])
-
-  /*
-   * If Firebase catalog changes,
-   * make sure the selected tour
-   * still exists.
+   * Keep the selected tour synced
+   * with the latest Firebase catalog.
+   *
+   * This means that when a price is
+   * changed in the dashboard, the
+   * booking dialog uses the updated
+   * tour object.
    */
   useEffect(() => {
     const updatedTour =
@@ -163,17 +111,11 @@ export default function BookingDialog({
           tour?.id,
       )
 
-    if (
-      updatedTour &&
-      updatedTour !== tour
-    ) {
+    if (updatedTour) {
       setTour(
         updatedTour,
       )
-    }
-
-    if (
-      !updatedTour &&
+    } else if (
       catalog.tours.length
     ) {
       setTour(
@@ -182,8 +124,20 @@ export default function BookingDialog({
     }
   }, [
     catalog.tours,
-    tour,
+    tour?.id,
   ])
+
+  /*
+   * The vehicles themselves do NOT
+   * contain the tour prices anymore.
+   *
+   * Prices are stored on the selected
+   * Firebase tour:
+   *
+   * tour.prices[vehicle.id]
+   */
+  const vehicles =
+    defaultVehicles
 
   const fare =
     calculateFare({
@@ -263,6 +217,7 @@ export default function BookingDialog({
    * Srinagar → Pahalgam
    *
    * automatically fills:
+   *
    * From = Srinagar
    * To   = Pahalgam
    */
@@ -486,11 +441,13 @@ export default function BookingDialog({
                   }
                 </small>
 
+                {/* PRICE NOW COMES
+                    DIRECTLY FROM
+                    THE SELECTED TOUR */}
                 <b>
                   {formatINR(
-                    option
-                      .prices?.[
-                      tour?.id
+                    tour?.prices?.[
+                      option.id
                     ] || 0,
                   )}
 
