@@ -51,19 +51,6 @@ export default function App() {
    * and administrator authorization.
    */
 
-  const isAdminRoute =
-    window.location.pathname === '/admin'
-
-  if (isAdminRoute) {
-    return (
-      <AdminPage
-        onBack={() => {
-          window.location.href = '/'
-        }}
-      />
-    )
-  }
-
   /*
    * ─────────────────────────────────────────────
    * PUBLIC WEBSITE STATE
@@ -129,6 +116,16 @@ export default function App() {
       unsubscribeAuth()
     }
   }, [])
+
+  if (window.location.pathname === '/admin') {
+    return (
+      <AdminPage
+        onBack={() => {
+          window.location.href = '/'
+        }}
+      />
+    )
+  }
 
   /*
    * ─────────────────────────────────────────────

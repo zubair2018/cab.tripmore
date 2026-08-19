@@ -19,7 +19,9 @@ For a production build, use `npm run build`.
 - `src/utils/calculateFare.js` — all fare rules and Indian currency formatting. Change fare rules here.
 - `src/services/firebase.js` — Firebase project configuration from environment variables.
 - `src/services/bookings.js` — Firestore booking creation and live dashboard subscription.
-- `firestore.rules` — Firestore access rules: public booking creation and authenticated company access.
+- `src/services/farePlaces.js` — live destination pricing with local defaults when Firebase is unavailable.
+- `src/components/AdminPage.jsx` — protected company login and dashboard entry point.
+- `firestore.rules` — Firestore access rules for public booking creation and admin-only reads and pricing changes.
 - `src/styles/global.css` — responsive visual styling for the entire site.
 
 ## Fare rules included
@@ -30,7 +32,7 @@ For a production build, use `npm run build`.
 | Srinagar to Gulmarg | ₹3,000 | ₹3,500 | ₹5,000 | ₹6,000 |
 | Srinagar to Sonamarg | ₹3,500 | ₹4,000 | ₹5,500 | ₹7,000 |
 
-The total is the selected tour price multiplied by the number of tour days. There are no extra Jammu or one-day supplements.
+The total is the selected tour price multiplied by the number of tour days. A Jammu-to-Jammu route adds a one-time ₹1,000 local charge.
 
 ## Firebase setup
 
@@ -38,9 +40,10 @@ The total is the selected tour price multiplied by the number of tour days. Ther
 2. Copy `.env.example` to `.env`.
 3. Copy the Web App configuration values from Firebase into `.env`.
 4. Open **Build → Authentication → Sign-in method**, enable **Email/Password**, and create a company user under the **Users** tab.
-5. In Firestore, create rules that allow only authenticated company staff to read the `bookings` collection. Customer booking creation should be protected with App Check or moved behind a Cloud Function before production.
-6. Run `npm run dev` and confirm that the dashboard says `Connected to Firebase Firestore`.
+5. Create an `admins/{userId}` document with `role: "admin"` and `active: true` for each dashboard user.
+6. Copy the contents of `firestore.rules` into **Firestore Database → Rules** and publish them.
+7. Run `npm run dev`, open `/admin`, and sign in with the authorized company user.
 
-Copy the contents of `firestore.rules` into **Firestore Database → Rules** and publish them. The dashboard login protects booking reads and updates; create a separate company user instead of sharing a personal Firebase account.
+The dashboard login protects booking reads and pricing changes; create a separate company user instead of sharing a personal Firebase account. The first authorized dashboard visit seeds the three default destinations into `farePlaces`.
 
 Bookings are saved in the `bookings` collection. Payment gateway webhooks should update `paymentStatus`, `paymentId`, and `paidAt`. A Firebase Cloud Function should then send the customer and company email/WhatsApp messages and update the four notification status fields.

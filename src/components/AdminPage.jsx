@@ -6,6 +6,7 @@ import Dashboard from './Dashboard'
 
 import { auth } from '../services/firebase'
 import { isAdminUser } from '../services/admin'
+import { subscribeToBookings } from '../services/bookings'
 
 export default function AdminPage({
   onBack,
@@ -13,6 +14,7 @@ export default function AdminPage({
   const [user, setUser] = useState(null)
   const [checking, setChecking] = useState(true)
   const [authorized, setAuthorized] = useState(false)
+  const [bookings, setBookings] = useState([])
 
   useEffect(() => {
     if (!auth) {
@@ -20,11 +22,16 @@ export default function AdminPage({
       return
     }
 
+    let unsubscribeBookings = () => {}
+
     const unsubscribe =
       onAuthStateChanged(
         auth,
         async (firebaseUser) => {
+          unsubscribeBookings()
+
           if (!firebaseUser) {
+            setBookings([])
             setUser(null)
             setAuthorized(false)
             setChecking(false)
@@ -37,6 +44,16 @@ export default function AdminPage({
           if (admin) {
             setUser(firebaseUser)
             setAuthorized(true)
+
+            unsubscribeBookings = subscribeToBookings(
+              setBookings,
+              (error) => {
+                console.error(
+                  'Could not load bookings from Firebase.',
+                  error,
+                )
+              },
+            )
           } else {
             await auth.signOut()
             setUser(null)
@@ -47,7 +64,10 @@ export default function AdminPage({
         }
       )
 
-    return unsubscribe
+    return () => {
+      unsubscribeBookings()
+      unsubscribe()
+    }
   }, [])
 
   if (checking) {
@@ -101,6 +121,9 @@ export default function AdminPage({
   }
 
   return (
-    <Dashboard onBack={onBack} />
+    <Dashboard
+      bookings={bookings}
+      onBack={onBack}
+    />
   )
 }

@@ -29,7 +29,7 @@ import {
   subscribeToFarePlaces,
   toggleFarePlace,
   updateFarePlace,
-} from '../services/farePlaces.jsx'
+} from '../services/farePlaces.js'
 
 
 export default function Dashboard({

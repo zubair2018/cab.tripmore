@@ -6,7 +6,7 @@ import {
 
 import {
   subscribeToFarePlaces,
-} from '../services/farePlaces'
+} from '../services/farePlaces.js'
 
 import {
   calculateFare,
@@ -131,6 +131,10 @@ export default function BookingDialog({
       tour,
       routes,
     })
+
+  const hasCompleteRoutes = routes.every(
+    (route) => route.from && route.to,
+  )
 
 
   /*
@@ -380,10 +384,11 @@ export default function BookingDialog({
           days={days}
           fare={fare}
           customerCanBook={Boolean(
-            customer.name &&
-            customer.email &&
-            customer.phone &&
-            tour,
+            customer.name.trim() &&
+            customer.email.trim() &&
+            customer.phone.trim() &&
+            tour &&
+            hasCompleteRoutes,
           )}
           onBook={
             confirmBooking
