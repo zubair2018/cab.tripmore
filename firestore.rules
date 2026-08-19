@@ -17,11 +17,6 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
-    match /farePlaces/{placeId} {
-      allow read: if resource.data.active == true || isAdmin();
-      allow create, update, delete: if isAdmin();
-    }
-
     match /admins/{adminId} {
       allow read: if request.auth != null && request.auth.uid == adminId;
       allow write: if false;
