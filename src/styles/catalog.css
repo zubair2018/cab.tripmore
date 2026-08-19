@@ -1,0 +1,210 @@
+/* =========================================
+   TRIPMORE CATALOG MANAGEMENT
+========================================= */
+
+.catalog-error {
+  margin: 20px 0;
+  padding: 14px 18px;
+  border-radius: 10px;
+  background: #fff0eb;
+  color: var(--danger);
+  font-weight: 700;
+}
+
+/* =========================================
+   ADD PLACE
+========================================= */
+
+.catalog-add-form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.catalog-add-form input {
+  flex: 1;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  outline: none;
+}
+
+.catalog-add-form input:focus {
+  border-color: var(--green);
+}
+
+.place-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.place-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px 9px 15px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font-weight: 700;
+}
+
+.place-chip button {
+  width: 25px;
+  height: 25px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #f1e5df;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.place-chip button:hover {
+  background: #ead5cb;
+}
+
+/* =========================================
+   ADD TOUR
+========================================= */
+
+.catalog-tour-form {
+  margin-bottom: 28px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--soft);
+}
+
+.catalog-tour-form h3 {
+  margin: 0 0 20px;
+}
+
+.catalog-form-grid {
+  display: grid;
+  grid-template-columns:
+    1.5fr 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.catalog-tour-form label {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.catalog-tour-form input,
+.catalog-tour-form select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  outline: none;
+}
+
+.catalog-tour-form input:focus,
+.catalog-tour-form select:focus {
+  border-color: var(--green);
+}
+
+/* =========================================
+   PRICE FIELDS
+========================================= */
+
+.catalog-price-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.catalog-price-input {
+  width: 110px;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  outline: none;
+}
+
+.catalog-price-input:focus {
+  border-color: var(--green);
+}
+
+/* =========================================
+   TABLE ACTIONS
+========================================= */
+
+.catalog-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.catalog-actions .button {
+  min-height: 38px;
+  padding: 0 13px;
+}
+
+.catalog-delete {
+  min-height: 34px;
+  border: 0;
+  background: transparent;
+  color: var(--danger);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.catalog-delete:hover {
+  text-decoration: underline;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 900px) {
+  .catalog-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-price-grid {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .catalog-add-form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .catalog-price-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-tour-form {
+    padding: 18px;
+  }
+}
