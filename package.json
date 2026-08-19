@@ -14,11 +14,5 @@
     "react": "latest",
     "react-dom": "latest",
     "vite": "latest"
-  },
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ]
+  }
 }
