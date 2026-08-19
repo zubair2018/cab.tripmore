@@ -1,8 +1,11 @@
-// One place for all fare rules. Update this file when pricing changes.
-
 const JAMMU_LOCAL_CHARGE = 1000
 
-export function calculateFare({ vehicle, days, tour, routes = [] }) {
+export function calculateFare({
+  vehicle,
+  days,
+  tour,
+  routes = [],
+}) {
   if (!vehicle || !tour) {
     return {
       base: 0,
@@ -11,20 +14,43 @@ export function calculateFare({ vehicle, days, tour, routes = [] }) {
     }
   }
 
-  const base = vehicle.prices[tour.id] * days
+  /*
+   * Price comes from the selected Firestore place.
+   *
+   * Example:
+   *
+   * Pahalgam + Sedan = ₹3500
+   * Gulmarg + Sedan  = ₹3000
+   * Jammu + Sedan    = ₹4000
+   */
 
-  // Add ₹1,000 when the customer selects Jammu as both
-  // the pickup and drop location. This is applied once
-  // per booking if at least one route matches Jammu → Jammu.
-  const hasJammuLocalRoute = routes.some(
-    (route) => route.from === 'Jammu' && route.to === 'Jammu'
-  )
+  const selectedPrice =
+    Number(
+      tour.prices?.[vehicle.id],
+    ) || 0
 
-  const jammuLocalCharge = hasJammuLocalRoute
-    ? JAMMU_LOCAL_CHARGE
-    : 0
+  const base =
+    selectedPrice * days
 
-  const total = base + jammuLocalCharge
+  /*
+   * Jammu → Jammu adds ₹1,000 once
+   * per booking.
+   */
+
+  const hasJammuLocalRoute =
+    routes.some(
+      (route) =>
+        route.from === 'Jammu' &&
+        route.to === 'Jammu',
+    )
+
+  const jammuLocalCharge =
+    hasJammuLocalRoute
+      ? JAMMU_LOCAL_CHARGE
+      : 0
+
+  const total =
+    base + jammuLocalCharge
 
   return {
     base,
