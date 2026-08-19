@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
+import { onAuthStateChanged } from 'firebase/auth'
 import BookingDialog from './components/BookingDialog'
 import Dashboard from './components/Dashboard'
-import { isFirebaseConfigured } from './services/firebase'
+import { auth, isFirebaseConfigured } from './services/firebase'
 import { saveBookingToFirebase, subscribeToBookings } from './services/bookings'
 import { formatINR } from './utils/calculateFare'
 
@@ -32,11 +33,22 @@ export default function App() {
     const [bookingError, setBookingError] = useState('')
 
   useEffect(() => {
-    if (!isFirebaseConfigured) return undefined
+    if (!isFirebaseConfigured || !auth) return undefined
 
-    return subscribeToBookings(setBookings, (error) => {
-      console.error('Could not load bookings from Firebase.', error)
+    let unsubscribeBookings = () => {}
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      unsubscribeBookings()
+      unsubscribeBookings = user
+        ? subscribeToBookings(setBookings, (error) => {
+          console.error('Could not load bookings from Firebase.', error)
+        })
+        : () => setBookings([])
     })
+
+    return () => {
+      unsubscribeBookings()
+      unsubscribeAuth()
+    }
   }, [])
 
   function openBookingDialog() {

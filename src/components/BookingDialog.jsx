@@ -17,8 +17,9 @@ export default function BookingDialog({ onClose, onBook, error }) {
   const [days, setDays] = useState(2)
   const [tour, setTour] = useState(tours[0])
   const [routes, setRoutes] = useState(makeEmptyRoutes(2))
+  const [customer, setCustomer] = useState({ name: '', email: '', phone: '' })
 
-  // This runs again whenever vehicle, days, pickup, or drop changes.
+  // Recalculate the fare when the vehicle, tour, or day count changes.
   const fare = calculateFare({ vehicle, days, tour })
 
   function changeDays(nextDays) {
@@ -43,7 +44,21 @@ export default function BookingDialog({ onClose, onBook, error }) {
   }
 
   function confirmBooking() {
-    onBook({ vehicle, days, tour, routes, fare })
+    onBook({
+      id: `TRP-${Date.now().toString().slice(-6)}`,
+      customer,
+      vehicle,
+      days,
+      tour,
+      routes,
+      fare,
+      paymentStatus: 'Pending',
+      customerEmailStatus: 'Pending',
+      customerWhatsappStatus: 'Pending',
+      companyEmailStatus: 'Pending',
+      companyWhatsappStatus: 'Pending',
+      createdAt: new Date().toISOString(),
+    })
   }
 
   return (
@@ -77,9 +92,27 @@ export default function BookingDialog({ onClose, onBook, error }) {
         />
 
         <RouteTable routes={routes} onChangeRoute={changeRoute} />
-          {error && <p className="booking-error">{error}</p>}
+        <CustomerDetails customer={customer} onChange={setCustomer} />
+        {error && <p className="booking-error">{error}</p>}
         <FarePanel vehicle={vehicle} days={days} fare={fare} customerCanBook={Boolean(customer.name && customer.email && customer.phone)} onBook={confirmBooking} />
       </section>
+    </div>
+  )
+}
+
+function CustomerDetails({ customer, onChange }) {
+  function update(field, value) {
+    onChange((oldCustomer) => ({ ...oldCustomer, [field]: value }))
+  }
+
+  return (
+    <div className="customer-details">
+      <StepTitle number="3" title="Customer details" />
+      <div className="customer-fields">
+        <label>Full name<input required value={customer.name} onChange={(event) => update('name', event.target.value)} placeholder="Enter customer name" /></label>
+        <label>Email address<input required type="email" value={customer.email} onChange={(event) => update('email', event.target.value)} placeholder="name@example.com" /></label>
+        <label>WhatsApp number<input required type="tel" value={customer.phone} onChange={(event) => update('phone', event.target.value)} placeholder="+91 00000 00000" /></label>
+      </div>
     </div>
   )
 }
@@ -162,7 +195,7 @@ function FarePanel({ vehicle, days, fare, customerCanBook, onBook }) {
         <small>{vehicle.name} · {days} {days === 1 ? 'tour day' : 'tour days'}</small>
       </div>
 
-      <button className="button button-primary" onClick={onBook}>
+      <button className="button button-primary" onClick={onBook} disabled={!customerCanBook}>
         Book this cab <span>→</span>
       </button>
     </div>

@@ -1,7 +1,11 @@
+import { useState } from 'react'
+import { signInWithEmailAndPassword } from 'firebase/auth'
 import { formatINR } from '../utils/calculateFare'
-import { isFirebaseConfigured } from '../services/firebase'
+import { auth, isFirebaseConfigured } from '../services/firebase'
 
 export default function Dashboard({ bookings, onBack }) {
+  if (isFirebaseConfigured && !auth.currentUser) return <DashboardLogin onBack={onBack} />
+
   const totalRevenue = bookings.reduce((sum, booking) => sum + booking.fare.total, 0)
   const paidRevenue = bookings
     .filter((booking) => booking.paymentStatus === 'Paid')
@@ -76,6 +80,38 @@ export default function Dashboard({ bookings, onBack }) {
           <span>Company email + WhatsApp <b>Pending setup</b></span>
         </div>
       </section>
+    </main>
+  )
+}
+
+function DashboardLogin({ onBack }) {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+
+  async function login(event) {
+    event.preventDefault()
+    setError('')
+    try {
+      await signInWithEmailAndPassword(auth, email, password)
+      window.location.reload()
+    } catch {
+      setError('Login failed. Check the company email and password.')
+    }
+  }
+
+  return (
+    <main className="dashboard-login-page">
+      <form className="dashboard-login" onSubmit={login}>
+        <p className="eyebrow">TRIPMORE OPERATIONS</p>
+        <h1>Company dashboard</h1>
+        <p>Sign in to view customer bookings and payment information.</p>
+        <label>Email address<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></label>
+        <label>Password<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required /></label>
+        {error && <p className="login-error">{error}</p>}
+        <button className="button button-primary" type="submit">Sign in</button>
+        <button className="button button-secondary" type="button" onClick={onBack}>Back to website</button>
+      </form>
     </main>
   )
 }
