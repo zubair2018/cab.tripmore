@@ -4,7 +4,7 @@ import { calculateFare, formatINR } from '../utils/calculateFare'
 
 const places = [
   'Srinagar', 'Gulmarg', 'Pahalgam', 'Sonamarg', 'Doodhpathri',
-  'Yusmarg',
+  'Yusmarg', 'Jammu',
 ]
 
 function makeEmptyRoutes(days) {
@@ -19,8 +19,8 @@ export default function BookingDialog({ onClose, onBook, error }) {
   const [routes, setRoutes] = useState(makeEmptyRoutes(2))
   const [customer, setCustomer] = useState({ name: '', email: '', phone: '' })
 
-  // Recalculate the fare when the vehicle, tour, or day count changes.
-  const fare = calculateFare({ vehicle, days, tour })
+  // Recalculate the fare when the vehicle, tour, day count, or routes change.
+  const fare = calculateFare({ vehicle, days, tour, routes })
 
   function changeDays(nextDays) {
     const safeDays = Math.min(14, Math.max(1, nextDays))
@@ -193,6 +193,9 @@ function FarePanel({ vehicle, days, fare, customerCanBook, onBook }) {
         <span>YOUR TRANSPORT FARE</span>
         <strong>{formatINR(fare.total)}</strong>
         <small>{vehicle.name} · {days} {days === 1 ? 'tour day' : 'tour days'}</small>
+        {fare.jammuLocalCharge > 0 && (
+          <small>Includes ₹1,000 Jammu local pickup & drop charge</small>
+        )}
       </div>
 
       <button className="button button-primary" onClick={onBook} disabled={!customerCanBook}>
