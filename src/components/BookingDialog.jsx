@@ -1,55 +1,31 @@
 import { useState } from 'react'
-import { vehicles } from '../data/vehicles'
+import { tours, vehicles } from '../data/vehicles'
 import { calculateFare, formatINR } from '../utils/calculateFare'
-import '../styles/booking-dialog.css'
 
 const places = [
-  'Srinagar',
-  'Gulmarg',
-  'Pahalgam',
-  'Sonamarg',
-  'Doodhpathri',
+  'Srinagar', 'Gulmarg', 'Pahalgam', 'Sonamarg', 'Doodhpathri',
   'Yusmarg',
-  'Jammu',
-  'Katra',
-  'Patnitop',
-  'Airport',
 ]
 
-const createRouteRows = (days) =>
-  Array.from({ length: days }, () => ({
-    from: '',
-    to: '',
-  }))
+function makeEmptyRoutes(days) {
+  return Array.from({ length: days }, () => ({ from: '', to: '' }))
+}
 
-export default function BookingDialog({ onClose, onBook }) {
-  // Selected rental/cab.
-  const [selectedVehicle, setSelectedVehicle] = useState(vehicles[0])
-
-  // Number of booking days.
+export default function BookingDialog({ onClose, onBook, error }) {
+  // All booking choices live in this component until the user clicks Book.
+  const [vehicle, setVehicle] = useState(vehicles[0])
   const [days, setDays] = useState(2)
+  const [tour, setTour] = useState(tours[0])
+  const [routes, setRoutes] = useState(makeEmptyRoutes(2))
 
-  // Pickup and drop cities decide whether Jammu charges apply.
-  const [pickupCity, setPickupCity] = useState('Srinagar')
-  const [dropCity, setDropCity] = useState('Srinagar')
+  // This runs again whenever vehicle, days, pickup, or drop changes.
+  const fare = calculateFare({ vehicle, days, tour })
 
-  // Stores every day's From and To places.
-  const [routes, setRoutes] = useState(createRouteRows(2))
-
-  // Fare recalculates automatically whenever vehicle, days, or city changes.
-  const fare = calculateFare({
-    vehicle: selectedVehicle,
-    days,
-    pickup: pickupCity,
-    drop: dropCity,
-  })
-
-  function changeDays(newDays) {
-    const safeDays = Math.max(1, Math.min(14, newDays))
-
+  function changeDays(nextDays) {
+    const safeDays = Math.min(14, Math.max(1, nextDays))
     setDays(safeDays)
 
-    // Keep old route entries and add/remove rows as needed.
+    // Keep the existing routes and only add/remove missing rows.
     setRoutes((oldRoutes) =>
       Array.from(
         { length: safeDays },
@@ -58,7 +34,7 @@ export default function BookingDialog({ onClose, onBook }) {
     )
   }
 
-  function updateRoute(dayIndex, field, value) {
+  function changeRoute(dayIndex, field, value) {
     setRoutes((oldRoutes) =>
       oldRoutes.map((route, index) =>
         index === dayIndex ? { ...route, [field]: value } : route
@@ -66,138 +42,129 @@ export default function BookingDialog({ onClose, onBook }) {
     )
   }
 
-  function handleBook() {
-    onBook({
-      vehicle: selectedVehicle,
-      days,
-      pickupCity,
-      dropCity,
-      routes,
-      fare,
-    })
+  function confirmBooking() {
+    onBook({ vehicle, days, tour, routes, fare })
   }
 
   return (
-    <div className="booking-overlay">
-      <section className="booking-dialog">
-        <button className="dialog-close" onClick={onClose} aria-label="Close">
+    <div className="booking-overlay" onMouseDown={onClose}>
+      <section
+        className="booking-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="booking-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <button className="dialog-close" onClick={onClose} aria-label="Close booking dialog">
           ×
         </button>
 
-        <h2 className="dialog-heading">Rentals</h2>
-
-        {/* Vehicle selection, like the top blue rental options in your image */}
-        <div className="vehicle-tabs">
-          {vehicles.map((vehicle) => (
-            <button
-              key={vehicle.id}
-              className={`vehicle-tab ${
-                selectedVehicle.id === vehicle.id ? 'active' : ''
-              }`}
-              onClick={() => setSelectedVehicle(vehicle)}
-            >
-              <strong>{vehicle.name}</strong>
-              <small>{vehicle.seats}</small>
-              <small>{formatINR(vehicle.rate)}/day</small>
-            </button>
-          ))}
+        <div className="dialog-intro">
+          <p className="eyebrow">YOUR TRANSPORT PLAN</p>
+          <h2 id="booking-title">Build your perfect ride.</h2>
+          <p>Choose a Kashmir day tour, select your vehicle, and see the exact fare upfront.</p>
         </div>
 
-        <div className="trip-settings">
-          <label>
-            Number of days
-            <select
-              value={days}
-              onChange={(event) => changeDays(Number(event.target.value))}
-            >
-              {Array.from({ length: 14 }, (_, index) => (
-                <option key={index + 1} value={index + 1}>
-                  {index + 1} {index === 0 ? 'Day' : 'Days'}
-                </option>
-              ))}
-            </select>
-          </label>
+        <StepTitle number="1" title="Choose your vehicle" />
+        <VehiclePicker selectedVehicle={vehicle} onSelect={setVehicle} />
 
-          <label>
-            Pickup city
-            <select
-              value={pickupCity}
-              onChange={(event) => setPickupCity(event.target.value)}
-            >
-              <option>Srinagar</option>
-              <option>Jammu</option>
-            </select>
-          </label>
+        <StepTitle number="2" title="Set your journey" />
+        <JourneySettings
+          days={days}
+          tour={tour}
+          onChangeDays={changeDays}
+          onChangeTour={setTour}
+        />
 
-          <label>
-            Drop city
-            <select
-              value={dropCity}
-              onChange={(event) => setDropCity(event.target.value)}
-            >
-              <option>Srinagar</option>
-              <option>Jammu</option>
-            </select>
-          </label>
-        </div>
-
-        {/* Day-wise From / To table */}
-        <div className="route-table">
-          <div className="route-table-header">
-            <span>Day</span>
-            <span>From</span>
-            <span>To</span>
-          </div>
-
-          {routes.map((route, index) => (
-            <div className="route-table-row" key={index}>
-              <strong>Day {index + 1}</strong>
-
-              <select
-                value={route.from}
-                onChange={(event) =>
-                  updateRoute(index, 'from', event.target.value)
-                }
-              >
-                <option value="">- Select -</option>
-                {places.map((place) => (
-                  <option key={place}>{place}</option>
-                ))}
-              </select>
-
-              <select
-                value={route.to}
-                onChange={(event) =>
-                  updateRoute(index, 'to', event.target.value)
-                }
-              >
-                <option value="">- Select -</option>
-                {places.map((place) => (
-                  <option key={place}>{place}</option>
-                ))}
-              </select>
-            </div>
-          ))}
-        </div>
-
-        {/* Live fare */}
-        <div className="fare-box">
-          <div>
-            <span>Total fare</span>
-            <strong>{formatINR(fare.total)}</strong>
-          </div>
-
-          <button className="book-button" onClick={handleBook}>
-            Book
-          </button>
-        </div>
-
-        <p className="fare-note">
-          {selectedVehicle.name}: {formatINR(fare.base)}
-          {fare.jammuCharge > 0 && ` + Jammu charge ${formatINR(fare.jammuCharge)}`}
-          {fare.oneDayCharge > 0 && ` + one-day charge ${formatINR(fare.oneDayCharge)}`}
-        </p>
+        <RouteTable routes={routes} onChangeRoute={changeRoute} />
+          {error && <p className="booking-error">{error}</p>}
+        <FarePanel vehicle={vehicle} days={days} fare={fare} customerCanBook={Boolean(customer.name && customer.email && customer.phone)} onBook={confirmBooking} />
       </section>
+    </div>
+  )
+}
+
+function StepTitle({ number, title }) {
+  return <div className="dialog-step"><span>{number}</span><strong>{title}</strong></div>
+}
+
+function VehiclePicker({ selectedVehicle, onSelect }) {
+  return (
+    <div className="vehicle-tabs">
+      {vehicles.map((vehicle) => (
+        <button
+          key={vehicle.id}
+          className={`vehicle-tab ${selectedVehicle.id === vehicle.id ? 'active' : ''}`}
+          onClick={() => onSelect(vehicle)}
+        >
+          <i>{vehicle.icon}</i>
+          <strong>{vehicle.name}</strong>
+          <small>{vehicle.seats}</small>
+          <b>{formatINR(vehicle.prices.pahalgam)}<em>/ tour</em></b>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function JourneySettings({ days, tour, onChangeDays, onChangeTour }) {
+  return (
+    <div className="journey-controls">
+      <div className="days-control">
+        <div>
+          <label>Number of days</label>
+          <small>Each day uses the selected tour rate.</small>
+        </div>
+
+        <div className="day-counter">
+          <button onClick={() => onChangeDays(days - 1)} aria-label="Remove a day">−</button>
+          <b>{days}</b>
+          <button onClick={() => onChangeDays(days + 1)} aria-label="Add a day">+</button>
+        </div>
+      </div>
+
+      <label className="city-select">Day tour<select value={tour.id} onChange={(event) => onChangeTour(tours.find((item) => item.id === event.target.value))}>{tours.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+    </div>
+  )
+}
+
+function RouteTable({ routes, onChangeRoute }) {
+  return (
+    <div className="route-plan">
+      <div className="route-heading"><span>Day</span><span>From</span><span>To</span></div>
+
+      {routes.map((route, index) => (
+        <div className="route-row" key={index}>
+          <strong>Day {index + 1}</strong>
+          <PlaceSelect value={route.from} onChange={(value) => onChangeRoute(index, 'from', value)} />
+          <PlaceSelect value={route.to} onChange={(value) => onChangeRoute(index, 'to', value)} />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function PlaceSelect({ value, onChange }) {
+  return (
+    <select value={value} onChange={(event) => onChange(event.target.value)}>
+      <option value="">Select place</option>
+      {places.map((place) => <option key={place}>{place}</option>)}
+    </select>
+  )
+}
+
+function FarePanel({ vehicle, days, fare, customerCanBook, onBook }) {
+  return (
+    <div className="fare-panel">
+      <div>
+        <span>YOUR TRANSPORT FARE</span>
+        <strong>{formatINR(fare.total)}</strong>
+        <small>{vehicle.name} · {days} {days === 1 ? 'tour day' : 'tour days'}</small>
+      </div>
+
+      <button className="button button-primary" onClick={onBook}>
+        Book this cab <span>→</span>
+      </button>
     </div>
   )
 }
