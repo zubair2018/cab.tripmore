@@ -1,39 +1,322 @@
-import {
-  useEffect,
-  useState,
-} from 'react'
+import { useEffect, useState } from 'react'
 
 import {
   vehicles as defaultVehicles,
 } from '../data/vehicles'
 
 import {
-  calculateFare,
-  formatINR,
-} from '../utils/calculateFare'
-
-import {
   defaultCatalog,
   subscribeToCatalog,
 } from '../services/catalog'
 
-function makeRoutes(
-  days,
-  tour,
-) {
+import {
+  formatINR,
+} from '../utils/calculateFare'
+
+import '../styles/booking-dialog.css'
+
+
+/*
+|--------------------------------------------------------------------------
+| Create empty journey rows
+|--------------------------------------------------------------------------
+*/
+
+function makeRoutes(days) {
   return Array.from(
     { length: days },
     () => ({
-      from:
-        tour?.origin ||
-        'Srinagar',
-
-      to:
-        tour?.destination ||
-        '',
+      from: '',
+      to: '',
     }),
   )
 }
+
+
+/*
+|--------------------------------------------------------------------------
+| Normalize place name
+|--------------------------------------------------------------------------
+|
+| Converts:
+|
+| Srinagar
+| srinagar
+|  Srinagar
+|
+| into the same comparison value.
+|
+|--------------------------------------------------------------------------
+*/
+
+function normalizePlace(place) {
+  return String(place || '')
+    .trim()
+    .toLowerCase()
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Find route price
+|--------------------------------------------------------------------------
+|
+| For one-day journeys:
+|
+| catalog.prices[1] contains:
+|
+| {
+|   gulmarg: {
+|     sedan: 3500,
+|     innova: 4000
+|   },
+|   pahalgam: {
+|     ...
+|   }
+| }
+|
+| This function dynamically finds the destination key.
+|
+| Therefore, if the admin adds:
+|
+| Doodhpathri
+|
+| with:
+|
+| sedan: 4000
+| innova: 4500
+|
+| the booking dialog automatically uses it.
+|
+|--------------------------------------------------------------------------
+*/
+
+function getOneDayRoutePrice(
+  prices,
+  from,
+  to,
+  vehicleId,
+) {
+  if (
+    !prices ||
+    !vehicleId ||
+    !from ||
+    !to
+  ) {
+    return 0
+  }
+
+  const fromKey =
+    normalizePlace(from)
+
+  const toKey =
+    normalizePlace(to)
+
+  /*
+  |--------------------------------------------------------------------------
+  | Same-place route
+  |--------------------------------------------------------------------------
+  |
+  | Example:
+  |
+  | Srinagar → Srinagar
+  |
+  | Try to find a matching route using the place name.
+  |
+  |--------------------------------------------------------------------------
+  */
+
+  const dayOnePrices =
+    prices?.[1] || {}
+
+  /*
+  |--------------------------------------------------------------------------
+  | First: direct destination match
+  |--------------------------------------------------------------------------
+  |
+  | Example:
+  |
+  | Srinagar → Gulmarg
+  |
+  | Gulmarg → Srinagar
+  |
+  | Both use:
+  |
+  | prices[1].gulmarg
+  |
+  |--------------------------------------------------------------------------
+  */
+
+  const destinationKeys =
+    Object.keys(dayOnePrices)
+
+  for (
+    const routeKey of destinationKeys
+  ) {
+    const normalizedRouteKey =
+      normalizePlace(routeKey)
+
+    /*
+    |--------------------------------------------------------------------------
+    | Direct destination match
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+      normalizedRouteKey ===
+      toKey
+    ) {
+      const routePrice =
+        dayOnePrices[
+          routeKey
+        ]
+
+      if (
+        routePrice &&
+        typeof routePrice === 'object'
+      ) {
+        return Number(
+          routePrice?.[
+            vehicleId
+          ] || 0,
+        )
+      }
+    }
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Special handling for Srinagar Local Sightseeing
+  |--------------------------------------------------------------------------
+  |
+  | The dashboard may store it as:
+  |
+  | srinagar-local
+  |
+  | while the place selector displays:
+  |
+  | Srinagar Local Sightseeing
+  |
+  |--------------------------------------------------------------------------
+  */
+
+  if (
+    toKey ===
+      'srinagar local sightseeing' ||
+    toKey ===
+      'srinagar-local'
+  ) {
+    const localPrice =
+      dayOnePrices?.[
+        'srinagar-local'
+      ]
+
+    if (
+      localPrice &&
+      typeof localPrice === 'object'
+    ) {
+      return Number(
+        localPrice?.[
+          vehicleId
+        ] || 0,
+      )
+    }
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Airport is normally bidirectional
+  |--------------------------------------------------------------------------
+  |
+  | Srinagar → Airport
+  |
+  | Airport → Srinagar
+  |
+  | both use:
+  |
+  | prices[1].airport
+  |
+  |--------------------------------------------------------------------------
+  */
+
+  if (
+    fromKey === 'airport' ||
+    toKey === 'airport'
+  ) {
+    const airportPrice =
+      dayOnePrices?.airport
+
+    if (
+      airportPrice &&
+      typeof airportPrice === 'object'
+    ) {
+      return Number(
+        airportPrice?.[
+          vehicleId
+        ] || 0,
+      )
+    }
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Reverse journey support
+  |--------------------------------------------------------------------------
+  |
+  | If the selected route is:
+  |
+  | Gulmarg → Srinagar
+  |
+  | the price should still come from:
+  |
+  | prices[1].gulmarg
+  |
+  |--------------------------------------------------------------------------
+  */
+
+  for (
+    const routeKey of destinationKeys
+  ) {
+    const normalizedRouteKey =
+      normalizePlace(routeKey)
+
+    if (
+      normalizedRouteKey ===
+      fromKey
+    ) {
+      const routePrice =
+        dayOnePrices[
+          routeKey
+        ]
+
+      if (
+        routePrice &&
+        typeof routePrice === 'object'
+      ) {
+        return Number(
+          routePrice?.[
+            vehicleId
+          ] || 0,
+        )
+      }
+    }
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | No configured price
+  |--------------------------------------------------------------------------
+  */
+
+  return 0
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Booking Dialog
+|--------------------------------------------------------------------------
+*/
 
 export default function BookingDialog({
   onClose,
@@ -45,12 +328,7 @@ export default function BookingDialog({
 
   const [vehicle, setVehicle] =
     useState(
-      defaultVehicles[0],
-    )
-
-  const [tour, setTour] =
-    useState(
-      defaultCatalog.tours[0],
+      defaultVehicles[0] || null,
     )
 
   const [days, setDays] =
@@ -58,10 +336,7 @@ export default function BookingDialog({
 
   const [routes, setRoutes] =
     useState(
-      makeRoutes(
-        1,
-        defaultCatalog.tours[0],
-      ),
+      makeRoutes(1),
     )
 
   const [customer, setCustomer] =
@@ -71,17 +346,24 @@ export default function BookingDialog({
       phone: '',
     })
 
+  const [showTerms, setShowTerms] =
+    useState(false)
+
+  const [validationErrors, setValidationErrors] =
+    useState({})
+
+
   /*
-   * Load places, tours and prices
-   * from Firebase in real time.
-   */
+  |--------------------------------------------------------------------------
+  | Load Firebase catalog
+  |--------------------------------------------------------------------------
+  */
+
   useEffect(() => {
     const unsubscribe =
       subscribeToCatalog(
         (nextCatalog) => {
-          setCatalog(
-            nextCatalog,
-          )
+          setCatalog(nextCatalog)
         },
         (catalogError) => {
           console.error(
@@ -94,80 +376,165 @@ export default function BookingDialog({
     return unsubscribe
   }, [])
 
+
   /*
-   * Keep the selected tour synced
-   * with the latest Firebase catalog.
-   *
-   * This means that when a price is
-   * changed in the dashboard, the
-   * booking dialog uses the updated
-   * tour object.
-   */
+  |--------------------------------------------------------------------------
+  | Vehicles
+  |--------------------------------------------------------------------------
+  |
+  | Vehicles can now also come from the dashboard.
+  |
+  |--------------------------------------------------------------------------
+  */
+
+  const vehicles =
+    catalog?.vehicles?.length
+      ? catalog.vehicles
+      : defaultVehicles
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Places
+  |--------------------------------------------------------------------------
+  */
+
+  const places =
+    catalog?.places?.length
+      ? catalog.places
+      : defaultCatalog.places
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Keep selected vehicle synchronized
+  |--------------------------------------------------------------------------
+  */
+
   useEffect(() => {
-    const updatedTour =
-      catalog.tours.find(
+    if (!vehicles.length) {
+      setVehicle(null)
+      return
+    }
+
+    const selectedVehicle =
+      vehicles.find(
         (item) =>
           item.id ===
-          tour?.id,
+          vehicle?.id,
       )
 
-    if (updatedTour) {
-      setTour(
-        updatedTour,
+    if (selectedVehicle) {
+      setVehicle(
+        selectedVehicle,
       )
-    } else if (
-      catalog.tours.length
-    ) {
-      setTour(
-        catalog.tours[0],
-      )
+      return
     }
+
+    setVehicle(
+      vehicles[0],
+    )
   }, [
-    catalog.tours,
-    tour?.id,
+    catalog?.vehicles,
+    vehicle?.id,
   ])
 
+
   /*
-   * The vehicles themselves do NOT
-   * contain the tour prices anymore.
-   *
-   * Prices are stored on the selected
-   * Firebase tour:
-   *
-   * tour.prices[vehicle.id]
-   */
-  const vehicles =
-    defaultVehicles
+  |--------------------------------------------------------------------------
+  | Calculate price for a specific vehicle
+  |--------------------------------------------------------------------------
+  */
 
-  const fare =
-    calculateFare({
-      vehicle,
-      tour,
-      days,
-    })
+  function getPriceForVehicle(
+    selectedVehicle,
+  ) {
+    if (
+      !catalog?.prices ||
+      !selectedVehicle
+    ) {
+      return 0
+    }
 
-  const completeRoutes =
-    routes.every(
-      (route) =>
-        route.from &&
+
+    /*
+    |--------------------------------------------------------------------------
+    | One-day booking
+    |--------------------------------------------------------------------------
+    */
+
+    if (days === 1) {
+      const route =
+        routes[0]
+
+      if (
+        !route?.from ||
+        !route?.to
+      ) {
+        return 0
+      }
+
+      return getOneDayRoutePrice(
+        catalog.prices,
+        route.from,
         route.to,
-    )
+        selectedVehicle.id,
+      )
+    }
 
-  const completeCustomer =
-    Object.values(
-      customer,
-    ).every(
-      (value) =>
-        value.trim(),
-    )
 
-  const canBook =
-    completeRoutes &&
-    completeCustomer
+    /*
+    |--------------------------------------------------------------------------
+    | Multiple-day package
+    |--------------------------------------------------------------------------
+    |
+    | For 2+ days the price is based on:
+    |
+    | number of days + vehicle
+    |
+    |--------------------------------------------------------------------------
+    */
+
+    return Number(
+      catalog.prices?.[
+        days
+      ]?.[
+        selectedVehicle.id
+      ] || 0,
+    )
+  }
+
 
   /*
-   * Number of days.
-   */
+  |--------------------------------------------------------------------------
+  | Current selected vehicle price
+  |--------------------------------------------------------------------------
+  */
+
+  const currentPrice =
+    getPriceForVehicle(
+      vehicle,
+    )
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Fare
+  |--------------------------------------------------------------------------
+  */
+
+  const fare = {
+    base: currentPrice,
+    total: currentPrice,
+  }
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Update number of days
+  |--------------------------------------------------------------------------
+  */
+
   function changeDays(
     nextDays,
   ) {
@@ -195,74 +562,22 @@ export default function BookingDialog({
             _,
             index,
           ) =>
-            oldRoutes[
-              index
-            ] || {
-              from:
-                tour?.origin ||
-                'Srinagar',
-
-              to:
-                tour?.destination ||
-                '',
+            oldRoutes[index] || {
+              from: '',
+              to: '',
             },
         ),
     )
+
+    setValidationErrors({})
   }
+
 
   /*
-   * Tour selection.
-   *
-   * Selecting:
-   * Srinagar → Pahalgam
-   *
-   * automatically fills:
-   *
-   * From = Srinagar
-   * To   = Pahalgam
-   */
-  function handleTourChange(
-    tourId,
-  ) {
-    const selectedTour =
-      catalog.tours.find(
-        (item) =>
-          item.id ===
-          tourId,
-      )
-
-    if (
-      !selectedTour
-    ) {
-      return
-    }
-
-    setTour(
-      selectedTour,
-    )
-
-    setRoutes(
-      (oldRoutes) =>
-        oldRoutes.map(
-          (
-            route,
-            index,
-          ) =>
-            index === 0
-              ? {
-                  ...route,
-
-                  from:
-                    selectedTour.origin ||
-                    'Srinagar',
-
-                  to:
-                    selectedTour.destination,
-                }
-              : route,
-        ),
-    )
-  }
+  |--------------------------------------------------------------------------
+  | Update route
+  |--------------------------------------------------------------------------
+  */
 
   function updateRoute(
     index,
@@ -286,7 +601,22 @@ export default function BookingDialog({
               : route,
         ),
     )
+
+    setValidationErrors(
+      (oldErrors) => ({
+        ...oldErrors,
+        routes: '',
+        price: '',
+      }),
+    )
   }
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Update customer
+  |--------------------------------------------------------------------------
+  */
 
   function updateCustomer(
     field,
@@ -295,15 +625,101 @@ export default function BookingDialog({
     setCustomer(
       (oldCustomer) => ({
         ...oldCustomer,
-
         [field]:
           value,
       }),
     )
+
+    setValidationErrors(
+      (oldErrors) => ({
+        ...oldErrors,
+        [field]: '',
+      }),
+    )
   }
 
+
+  /*
+  |--------------------------------------------------------------------------
+  | Validate booking
+  |--------------------------------------------------------------------------
+  */
+
+  function validateBooking() {
+    const errors = {}
+
+    const incompleteRoute =
+      routes.some(
+        (route) =>
+          !route.from ||
+          !route.to,
+      )
+
+    if (incompleteRoute) {
+      errors.routes =
+        'Please select both From and To for every journey day.'
+    }
+
+
+    if (!customer.name.trim()) {
+      errors.name =
+        'Please enter your full name.'
+    }
+
+
+    if (!customer.email.trim()) {
+      errors.email =
+        'Please enter your email address.'
+    } else if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        customer.email.trim(),
+      )
+    ) {
+      errors.email =
+        'Please enter a valid email address.'
+    }
+
+
+    if (!customer.phone.trim()) {
+      errors.phone =
+        'Please enter your WhatsApp number.'
+    }
+
+
+    if (!vehicle) {
+      errors.vehicle =
+        'Please select a vehicle.'
+    }
+
+
+    if (currentPrice <= 0) {
+      errors.price =
+        'No fare is configured for this journey and vehicle. Please choose another route or contact TripMore.'
+    }
+
+
+    setValidationErrors(
+      errors,
+    )
+
+    return (
+      Object.keys(errors).length ===
+      0
+    )
+  }
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Submit booking
+  |--------------------------------------------------------------------------
+  */
+
   function submitBooking() {
-    if (!canBook) {
+    const isValid =
+      validateBooking()
+
+    if (!isValid) {
       return
     }
 
@@ -315,8 +731,6 @@ export default function BookingDialog({
       customer,
 
       vehicle,
-
-      tour,
 
       days,
 
@@ -344,6 +758,13 @@ export default function BookingDialog({
     })
   }
 
+
+  /*
+  |--------------------------------------------------------------------------
+  | Render
+  |--------------------------------------------------------------------------
+  */
+
   return (
     <div
       className="booking-overlay"
@@ -362,6 +783,9 @@ export default function BookingDialog({
           event.stopPropagation()
         }
       >
+
+        {/* CLOSE */}
+
         <button
           className="dialog-close"
           type="button"
@@ -373,24 +797,27 @@ export default function BookingDialog({
           ×
         </button>
 
+
+        {/* INTRO */}
+
         <div className="dialog-intro">
+
           <p className="eyebrow">
             TRIPMORE CAB SERVICE
           </p>
 
           <h2 id="booking-title">
-            Plan your Kashmir
-            ride.
+            Plan your Kashmir ride.
           </h2>
 
           <p>
-            Select a tour and
-            vehicle. The fare
-            uses Tripmore's
-            published daily
-            rates.
+            Select your vehicle,
+            journey and details
+            to book your cab.
           </p>
+
         </div>
+
 
         {/* VEHICLES */}
 
@@ -399,67 +826,95 @@ export default function BookingDialog({
           title="Choose a vehicle"
         />
 
+        {validationErrors.vehicle && (
+          <p className="booking-validation-error">
+            {validationErrors.vehicle}
+          </p>
+        )}
+
         <div className="vehicle-tabs">
+
           {vehicles.map(
-            (option) => (
-              <button
-                className={`vehicle-tab ${
-                  vehicle.id ===
-                  option.id
-                    ? 'active'
-                    : ''
-                }`}
-                type="button"
-                key={
-                  option.id
-                }
-                onClick={() =>
-                  setVehicle(
-                    option,
-                  )
-                }
-              >
-                <i>
-                  {
-                    option.icon
+            (option) => {
+              const vehiclePrice =
+                getPriceForVehicle(
+                  option,
+                )
+
+              const isSelected =
+                vehicle?.id ===
+                option.id
+
+              return (
+                <button
+                  className={`vehicle-tab ${
+                    isSelected
+                      ? 'active'
+                      : ''
+                  }`}
+                  type="button"
+                  key={
+                    option.id
                   }
-                </i>
+                  onClick={() => {
+                    setVehicle(
+                      option,
+                    )
 
-                <strong>
-                  {
-                    option.name
-                  }
-                </strong>
+                    setValidationErrors(
+                      (oldErrors) => ({
+                        ...oldErrors,
+                        vehicle: '',
+                        price: '',
+                      }),
+                    )
+                  }}
+                >
 
-                <small>
-                  {
-                    option.seats
-                  }{' '}
-                  ·{' '}
-                  {
-                    option.luggage
-                  }
-                </small>
+                  <i>
+                    {
+                      option.icon
+                    }
+                  </i>
 
-                {/* PRICE NOW COMES
-                    DIRECTLY FROM
-                    THE SELECTED TOUR */}
-                <b>
-                  {formatINR(
-                    tour?.prices?.[
-                      option.id
-                    ] || 0,
-                  )}
+                  <strong>
+                    {
+                      option.name
+                    }
+                  </strong>
 
-                  <em>
-                    {' '}
-                    / day
-                  </em>
-                </b>
-              </button>
-            ),
+                  <small>
+                    {
+                      option.seats
+                    }
+                    {' · '}
+                    {
+                      option.luggage
+                    }
+                  </small>
+
+                  <b>
+                    {vehiclePrice > 0
+                      ? formatINR(
+                          vehiclePrice,
+                        )
+                      : 'Select journey'}
+
+                    {vehiclePrice > 0 && (
+                      <em>
+                        {' '}
+                        total
+                      </em>
+                    )}
+                  </b>
+
+                </button>
+              )
+            },
           )}
+
         </div>
+
 
         {/* JOURNEY */}
 
@@ -469,12 +924,15 @@ export default function BookingDialog({
         />
 
         <div className="journey-controls">
+
           <div className="days-control">
+
             <label>
               Number of days
             </label>
 
             <div className="day-counter">
+
               <button
                 type="button"
                 onClick={() =>
@@ -502,50 +960,20 @@ export default function BookingDialog({
               >
                 +
               </button>
+
             </div>
+
           </div>
 
-          <label className="city-select">
-            Day tour
-
-            <select
-              value={
-                tour?.id ||
-                ''
-              }
-              onChange={(
-                event,
-              ) =>
-                handleTourChange(
-                  event.target
-                    .value,
-                )
-              }
-            >
-              {catalog.tours.map(
-                (item) => (
-                  <option
-                    key={
-                      item.id
-                    }
-                    value={
-                      item.id
-                    }
-                  >
-                    {
-                      item.name
-                    }
-                  </option>
-                ),
-              )}
-            </select>
-          </label>
         </div>
 
-        {/* ROUTES */}
+
+        {/* JOURNEY ROUTES */}
 
         <div className="route-plan">
+
           <div className="route-heading">
+
             <span>
               Day
             </span>
@@ -557,28 +985,32 @@ export default function BookingDialog({
             <span>
               To
             </span>
+
           </div>
+
 
           {routes.map(
             (
               route,
               index,
             ) => (
+
               <div
                 className="route-row"
                 key={
                   index
                 }
               >
+
                 <strong>
                   Day{' '}
-                  {index +
-                    1}
+                  {index + 1}
                 </strong>
+
 
                 <PlaceSelect
                   places={
-                    catalog.places
+                    places
                   }
                   value={
                     route.from
@@ -594,9 +1026,10 @@ export default function BookingDialog({
                   }
                 />
 
+
                 <PlaceSelect
                   places={
-                    catalog.places
+                    places
                   }
                   value={
                     route.to
@@ -611,81 +1044,99 @@ export default function BookingDialog({
                     )
                   }
                 />
+
               </div>
+
             ),
           )}
+
+          {validationErrors.routes && (
+            <p className="booking-validation-error">
+              {validationErrors.routes}
+            </p>
+          )}
+
+          {validationErrors.price && (
+            <p className="booking-validation-error">
+              {validationErrors.price}
+            </p>
+          )}
+
         </div>
 
-        {/* CUSTOMER */}
+
+        {/* CUSTOMER DETAILS */}
 
         <StepTitle
           number="3"
           title="Your details"
         />
 
+
         <div className="customer-fields">
-          <label>
-            Full name
 
-            <input
-              value={
-                customer.name
-              }
-              onChange={(
-                event,
-              ) =>
-                updateCustomer(
-                  'name',
-                  event.target
-                    .value,
-                )
-              }
-              placeholder="Your name"
-            />
-          </label>
+          <CustomerField
+            label="Full name"
+            value={
+              customer.name
+            }
+            error={
+              validationErrors.name
+            }
+            onChange={(
+              value,
+            ) =>
+              updateCustomer(
+                'name',
+                value,
+              )
+            }
+          />
 
-          <label>
-            Email address
 
-            <input
-              type="email"
-              value={
-                customer.email
-              }
-              onChange={(
-                event,
-              ) =>
-                updateCustomer(
-                  'email',
-                  event.target
-                    .value,
-                )
-              }
-              placeholder="name@example.com"
-            />
-          </label>
+          <CustomerField
+            label="Email address"
+            type="email"
+            value={
+              customer.email
+            }
+            error={
+              validationErrors.email
+            }
+            onChange={(
+              value,
+            ) =>
+              updateCustomer(
+                'email',
+                value,
+              )
+            }
+          />
 
-          <label>
-            WhatsApp number
 
-            <input
-              type="tel"
-              value={
-                customer.phone
-              }
-              onChange={(
-                event,
-              ) =>
-                updateCustomer(
-                  'phone',
-                  event.target
-                    .value,
-                )
-              }
-              placeholder="+91 00000 00000"
-            />
-          </label>
+          <CustomerField
+            label="WhatsApp number"
+            type="tel"
+            value={
+              customer.phone
+            }
+            error={
+              validationErrors.phone
+            }
+            onChange={(
+              value,
+            ) =>
+              updateCustomer(
+                'phone',
+                value,
+              )
+            }
+          />
+
         </div>
+
+
+        {/* ERROR FROM PARENT */}
 
         {error && (
           <p className="booking-error">
@@ -693,10 +1144,13 @@ export default function BookingDialog({
           </p>
         )}
 
+
         {/* FARE */}
 
         <div className="fare-panel">
+
           <div>
+
             <span>
               YOUR TRANSPORT FARE
             </span>
@@ -709,37 +1163,144 @@ export default function BookingDialog({
 
             <small>
               {
-                vehicle.name
-              }{' '}
-              ·{' '}
-              {
-                tour?.destination
-              }{' '}
-              ·{' '}
+                vehicle?.name
+              }
+              {' · '}
               {days}{' '}
-              {days === 1
-                ? 'day'
-                : 'days'}
+              {
+                days === 1
+                  ? 'day'
+                  : 'days'
+              }
             </small>
+
           </div>
+
 
           <button
             className="button button-primary"
             type="button"
-            disabled={
-              !canBook
-            }
             onClick={
               submitBooking
             }
           >
-            Book this cab →
+            Book my cab →
           </button>
+
+
+          {/* TERMS */}
+
+          <div className="terms-section">
+
+            <button
+              className="terms-button"
+              type="button"
+              onClick={() =>
+                setShowTerms(
+                  !showTerms,
+                )
+              }
+            >
+              {showTerms
+                ? 'Hide Terms & Conditions'
+                : 'Terms & Conditions'}
+            </button>
+
+
+            {showTerms && (
+
+              <div className="terms-box">
+
+                <h3>
+                  Terms & Conditions
+                </h3>
+
+                <ol>
+
+                  <li>
+                    Booking requests are
+                    subject to vehicle
+                    availability.
+                  </li>
+
+                  <li>
+                    The displayed fare is
+                    based on the selected
+                    vehicle, number of days
+                    and journey details.
+                  </li>
+
+                  <li>
+                    Any change in the
+                    journey after booking
+                    may affect the final
+                    fare.
+                  </li>
+
+                  <li>
+                    The customer must
+                    provide accurate contact
+                    information.
+                  </li>
+
+                  <li>
+                    A booking is confirmed
+                    only after confirmation
+                    from TripMore.
+                  </li>
+
+                  <li>
+                    The customer should be
+                    available at the agreed
+                    pickup location and
+                    reporting time.
+                  </li>
+
+                  <li>
+                    Additional charges may
+                    apply if the journey is
+                    changed, extended or
+                    requires additional
+                    services.
+                  </li>
+
+                  <li>
+                    TripMore may modify or
+                    cancel a booking because
+                    of vehicle availability,
+                    weather, road conditions
+                    or other unforeseen
+                    circumstances.
+                  </li>
+
+                  <li>
+                    The final booking amount
+                    and payment terms will be
+                    communicated during booking
+                    confirmation.
+                  </li>
+
+                </ol>
+
+              </div>
+
+            )}
+
+          </div>
+
         </div>
+
       </section>
     </div>
   )
 }
+
+
+/*
+|--------------------------------------------------------------------------
+| Step title
+|--------------------------------------------------------------------------
+*/
 
 function StepTitle({
   number,
@@ -747,6 +1308,7 @@ function StepTitle({
 }) {
   return (
     <div className="dialog-step">
+
       <span>
         {number}
       </span>
@@ -754,9 +1316,39 @@ function StepTitle({
       <strong>
         {title}
       </strong>
+
     </div>
   )
 }
+
+
+/*
+|--------------------------------------------------------------------------
+| Place selector
+|--------------------------------------------------------------------------
+|
+| Places are received directly from the Firebase catalog.
+|
+| Therefore:
+|
+| Dashboard adds:
+|
+| Doodhpathri
+|
+| ↓
+|
+| Firebase catalog.places
+|
+| ↓
+|
+| BookingDialog
+|
+| ↓
+|
+| Doodhpathri appears here automatically.
+|
+|--------------------------------------------------------------------------
+*/
 
 function PlaceSelect({
   places,
@@ -772,25 +1364,85 @@ function PlaceSelect({
         event,
       ) =>
         onChange(
-          event.target
-            .value,
+          event.target.value,
         )
       }
+      aria-label="Select place"
     >
+
       <option value="">
         Select place
       </option>
 
       {places.map(
         (place) => (
+
           <option
             key={place}
             value={place}
           >
             {place}
           </option>
+
         ),
       )}
+
     </select>
+  )
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Customer field
+|--------------------------------------------------------------------------
+*/
+
+function CustomerField({
+  label,
+  type = 'text',
+  value,
+  error,
+  onChange,
+}) {
+  return (
+    <label
+      className={
+        error
+          ? 'field-error'
+          : ''
+      }
+    >
+
+      <span>
+        {label}
+        <b aria-hidden="true">
+          {' '}*
+        </b>
+      </span>
+
+      <input
+        type={type}
+        value={value}
+        onChange={(
+          event,
+        ) =>
+          onChange(
+            event.target.value,
+          )
+        }
+        required
+        aria-invalid={
+          Boolean(error)
+        }
+      />
+
+      {error && (
+        <small>
+          {error}
+        </small>
+      )}
+
+    </label>
   )
 }

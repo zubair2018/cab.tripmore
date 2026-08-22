@@ -1,46 +1,225 @@
+/* =========================================================
+   TRIPMORE CAB
+   GLOBAL CSS
+   ========================================================= */
+
+
+/* =========================================================
+   DESIGN VARIABLES
+   ========================================================= */
+
 :root {
-  --paper: #f8f7f2;
+  --bg: #f7f6f1;
   --surface: #ffffff;
-  --soft: #eef0ea;
-  --ink: #17211b;
-  --muted: #68746c;
-  --green: #1d704c;
-  --green-dark: #124a30;
-  --gold: #f4b35a;
-  --line: #d7d9d1;
-  --danger: #9a4324;
-  font-family: 'DM Sans', sans-serif;
-  color: var(--ink);
-  background: var(--paper);
+  --surface-soft: #f0f3ed;
+
+  --text: #071b26;
+  --text-soft: #52616a;
+  --text-muted: #718087;
+
+  --green: #197b55;
+  --green-dark: #116746;
+  --green-light: #e5f1ea;
+
+  --border: #dce3df;
+  --border-dark: #c8d2cc;
+
+  --danger: #c93434;
+  --warning: #b7791f;
+
+  --white: #ffffff;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+
+  --shadow-sm: 0 4px 14px rgba(7, 27, 38, 0.06);
+  --shadow-md: 0 10px 30px rgba(7, 27, 38, 0.10);
+  --shadow-lg: 0 18px 50px rgba(7, 27, 38, 0.15);
+
+  --container: 1100px;
+}
+
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+
+  scroll-behavior: smooth;
+
+  overflow-x: hidden;
 }
 
 body {
-  background: var(--paper);
-  color: var(--ink);
+  width: 100%;
+  max-width: 100%;
+
+  margin: 0;
+  padding: 0;
+
+  background: var(--bg);
+  color: var(--text);
+
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  font-size: 16px;
+  line-height: 1.5;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  overflow-x: hidden;
 }
 
-.eyebrow {
-  margin-bottom: 10px;
-  color: var(--green);
-  font: 700 11px 'DM Mono', monospace;
-  letter-spacing: 1px;
+#root {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+
+  overflow-x: hidden;
 }
+
+
+/* =========================================================
+   ELEMENTS
+   ========================================================= */
+
+img,
+svg,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0;
+}
+
+p {
+  margin-bottom: 1rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text);
+}
+
+
+/* =========================================================
+   TEXT HELPERS
+   ========================================================= */
+
+.eyebrow {
+  margin-bottom: 12px;
+
+  color: var(--green);
+
+  font-size: 12px;
+  font-weight: 800;
+
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+
+  text-transform: uppercase;
+}
+
+
+/* =========================================================
+   BUTTON SYSTEM
+   ========================================================= */
 
 .button {
   display: inline-flex;
+
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  min-height: 44px;
-  padding: 0 18px;
-  border: 0;
-  border-radius: 9px;
+
+  min-height: 46px;
+
+  padding: 12px 20px;
+
+  border: 1px solid transparent;
+  border-radius: 10px;
+
+  font-size: 15px;
   font-weight: 700;
+
+  line-height: 1.2;
+
+  text-align: center;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+}
+
+.button:active {
+  transform: translateY(0);
 }
 
 .button-primary {
   background: var(--green);
-  color: #fff;
+  color: var(--white);
+
+  box-shadow: 0 8px 18px rgba(25, 123, 85, 0.18);
 }
 
 .button-primary:hover {
@@ -48,7 +227,1015 @@ body {
 }
 
 .button-secondary {
-  border: 1px solid var(--line);
+  background: #eeeeee;
+  color: var(--text);
+}
+
+.button-secondary:hover {
+  background: #e4e4e4;
+}
+
+
+/* =========================================================
+   FORM ELEMENTS
+   ========================================================= */
+
+input,
+select,
+textarea {
+  width: 100%;
+  max-width: 100%;
+
+  min-height: 46px;
+
+  padding: 11px 13px;
+
+  border: 1px solid var(--border-dark);
+  border-radius: 9px;
+
   background: var(--surface);
-  color: var(--ink);
+  color: var(--text);
+
+  font-size: 15px;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--green);
+
+  box-shadow:
+    0 0 0 3px rgba(25, 123, 85, 0.10);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9aa5aa;
+}
+
+
+/* =========================================================
+   COMMON CONTAINER
+   ========================================================= */
+
+.topbar-inner,
+.hero-section,
+.trust-strip,
+.destinations-section,
+.why-section,
+.fleet-section,
+.how-section,
+.tour-section-inner,
+footer {
+  width: min(
+    var(--container),
+    calc(100% - 40px)
+  );
+
+  margin-inline: auto;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.topbar {
+  width: 100%;
+}
+
+.topbar-inner {
+  min-height: 72px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero-section {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1.05fr)
+    minmax(0, 0.95fr);
+
+  align-items: center;
+
+  gap: 55px;
+
+  min-height: 570px;
+
+  padding: 64px 0;
+}
+
+
+/* =========================================================
+   COMMON SECTION SPACING
+   ========================================================= */
+
+.trust-strip,
+.destinations-section,
+.why-section,
+.fleet-section,
+.how-section,
+.tour-section-inner {
+  padding-top: 60px;
+  padding-bottom: 60px;
+}
+
+
+/* =========================================================
+   COMMON GRID SAFETY
+   ========================================================= */
+
+.hero-section > *,
+.trust-strip > *,
+.destinations-section > *,
+.why-section > *,
+.fleet-section > *,
+.how-section > *,
+.tour-section-inner > * {
+  min-width: 0;
+}
+
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.destination-card,
+.vehicle-card,
+.vehicle-option,
+.confirmation-card {
+  min-width: 0;
+
+  border: 1px solid var(--border);
+
+  background: var(--surface);
+
+  border-radius: var(--radius-md);
+
+  box-shadow: var(--shadow-sm);
+}
+
+
+/* =========================================================
+   MODAL BACKDROP
+   ========================================================= */
+
+.modal-overlay,
+.booking-overlay,
+.booking-modal-overlay,
+.modal-backdrop {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 1000;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: rgba(7, 18, 25, 0.62);
+
+  overflow-y: auto;
+}
+
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+.modal,
+.booking-modal,
+.booking-dialog,
+.booking-modal-content,
+[role="dialog"] {
+  max-width: 760px;
+  width: 100%;
+
+  max-height: calc(100vh - 48px);
+
+  background: var(--surface);
+
+  border-radius: var(--radius-xl);
+
+  box-shadow: var(--shadow-lg);
+
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+
+/* =========================================================
+   MODAL CONTENT
+   ========================================================= */
+
+.modal-content,
+.booking-modal-content,
+.booking-dialog-content {
+  width: 100%;
+  max-width: 100%;
+
+  padding: 28px;
+}
+
+
+/* =========================================================
+   MODAL HEADINGS
+   ========================================================= */
+
+.modal h1,
+.modal h2,
+.booking-modal h1,
+.booking-modal h2,
+.booking-dialog h1,
+.booking-dialog h2 {
+  color: var(--text);
+
+  line-height: 1.15;
+}
+
+
+/* =========================================================
+   BOOKING FORM
+   ========================================================= */
+
+.booking-form,
+.booking-form-grid,
+.form-grid {
+  width: 100%;
+  max-width: 100%;
+}
+
+.booking-form-grid,
+.form-grid {
+  display: grid;
+
+  grid-template-columns: repeat(
+    3,
+    minmax(0, 1fr)
+  );
+
+  gap: 14px;
+}
+
+
+/* =========================================================
+   VEHICLE OPTIONS
+   ========================================================= */
+
+.vehicle-grid,
+.vehicle-options,
+.vehicle-selection {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+.vehicle-card,
+.vehicle-option {
+  width: 100%;
+}
+
+
+/* =========================================================
+   JOURNEY ROW
+   ========================================================= */
+
+.journey-row,
+.day-row,
+.route-row {
+  width: 100%;
+  min-width: 0;
+}
+
+
+/* =========================================================
+   CONFIRMATION PAGE
+   ========================================================= */
+
+.confirmation-page,
+.booking-confirmation,
+.confirmation-section,
+.booking-success,
+.success-page {
+  width: min(
+    var(--container),
+    calc(100% - 40px)
+  );
+
+  margin-inline: auto;
+
+  padding-top: 70px;
+  padding-bottom: 70px;
+}
+
+.confirmation-page h1,
+.booking-confirmation h1,
+.confirmation-section h1,
+.booking-success h1,
+.success-page h1 {
+  font-size: clamp(42px, 5vw, 64px);
+
+  line-height: 1.02;
+
+  letter-spacing: -2px;
+
+  margin-bottom: 20px;
+}
+
+.confirmation-page p,
+.booking-confirmation p,
+.confirmation-section p,
+.booking-success p,
+.success-page p {
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   CONFIRMATION ACTIONS
+   ========================================================= */
+
+.confirmation-actions,
+.booking-confirmation-actions,
+.confirmation-page .buttons,
+.booking-confirmation .buttons {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 12px;
+
+  margin-top: 28px;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+footer {
+  padding-top: 60px;
+  padding-bottom: 40px;
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .topbar-inner,
+  .hero-section,
+  .trust-strip,
+  .destinations-section,
+  .why-section,
+  .fleet-section,
+  .how-section,
+  .tour-section-inner,
+  footer {
+    width: calc(100% - 32px);
+  }
+
+
+  /* Hero becomes single column */
+
+  .hero-section {
+    grid-template-columns: 1fr;
+
+    gap: 35px;
+
+    min-height: auto;
+
+    padding-top: 50px;
+    padding-bottom: 50px;
+  }
+
+
+  /* Form becomes two columns */
+
+  .booking-form-grid,
+  .form-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  /* -------------------------------------------------------
+     GLOBAL
+     ------------------------------------------------------- */
+
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+
+    overflow-x: hidden;
+  }
+
+  body {
+    font-size: 16px;
+  }
+
+  #root {
+    width: 100%;
+    max-width: 100%;
+
+    overflow-x: hidden;
+  }
+
+  img,
+  svg,
+  video {
+    max-width: 100%;
+  }
+
+
+  /* -------------------------------------------------------
+     CONTAINERS
+     ------------------------------------------------------- */
+
+  .topbar-inner,
+  .hero-section,
+  .trust-strip,
+  .destinations-section,
+  .why-section,
+  .fleet-section,
+  .how-section,
+  .tour-section-inner,
+  footer {
+    width: calc(100% - 32px);
+
+    max-width: none;
+
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+
+  /* -------------------------------------------------------
+     HEADER
+     ------------------------------------------------------- */
+
+  .topbar-inner {
+    min-height: 64px;
+
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+
+  /* -------------------------------------------------------
+     HERO
+     ------------------------------------------------------- */
+
+  .hero-section {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 28px;
+
+    min-height: auto;
+
+    padding-top: 42px;
+    padding-bottom: 45px;
+  }
+
+  .hero-section > * {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .hero-section h1 {
+    font-size: clamp(
+      36px,
+      10vw,
+      52px
+    );
+
+    line-height: 1.02;
+
+    letter-spacing: -1.5px;
+  }
+
+  .hero-section p {
+    font-size: 16px;
+
+    line-height: 1.6;
+  }
+
+
+  /* -------------------------------------------------------
+     BUTTONS
+     ------------------------------------------------------- */
+
+  button,
+  .button,
+  .btn,
+  a.btn,
+  .primary-btn,
+  .secondary-btn {
+    min-height: 48px;
+  }
+
+
+  /* -------------------------------------------------------
+     SECTIONS
+     ------------------------------------------------------- */
+
+  .trust-strip,
+  .destinations-section,
+  .why-section,
+  .fleet-section,
+  .how-section,
+  .tour-section-inner {
+    padding-top: 45px;
+    padding-bottom: 45px;
+  }
+
+
+  .destinations-section h2,
+  .why-section h2,
+  .fleet-section h2,
+  .how-section h2,
+  .tour-section h2 {
+    font-size: 32px;
+
+    line-height: 1.08;
+
+    letter-spacing: -0.8px;
+  }
+
+
+  /* -------------------------------------------------------
+     DESTINATIONS
+     ------------------------------------------------------- */
+
+  .destination-grid,
+  .destinations-grid {
+    grid-template-columns: 1fr !important;
+
+    gap: 14px;
+  }
+
+  .destination-card {
+    width: 100%;
+
+    min-width: 0;
+  }
+
+
+  /* -------------------------------------------------------
+     GENERAL GRIDS
+     ------------------------------------------------------- */
+
+  .why-grid,
+  .fleet-grid,
+  .how-grid,
+  .tour-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+
+  /* -------------------------------------------------------
+     FORMS
+     ------------------------------------------------------- */
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    max-width: 100%;
+
+    min-height: 46px;
+
+    font-size: 16px;
+  }
+
+  label {
+    font-size: 13px;
+  }
+
+  .booking-form-grid,
+  .form-grid {
+    grid-template-columns: 1fr !important;
+
+    gap: 12px !important;
+  }
+
+
+  /* -------------------------------------------------------
+     VEHICLE SELECTION
+     ------------------------------------------------------- */
+
+  .vehicle-grid,
+  .vehicle-options,
+  .vehicle-selection {
+    display: grid !important;
+
+    grid-template-columns:
+      1fr 1fr !important;
+
+    gap: 10px !important;
+  }
+
+  .vehicle-card,
+  .vehicle-option {
+    width: 100% !important;
+
+    min-width: 0 !important;
+  }
+
+
+  /* -------------------------------------------------------
+     JOURNEY
+     ------------------------------------------------------- */
+
+  .journey-row,
+  .day-row,
+  .route-row {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+    width: 100%;
+  }
+
+
+  /* =======================================================
+     BOOKING MODAL
+     ======================================================= */
+
+  .modal-overlay,
+  .booking-overlay,
+  .booking-modal-overlay,
+  .modal-backdrop {
+    padding: 12px !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+  }
+
+
+  .modal,
+  .booking-modal,
+  .booking-dialog,
+  .booking-modal-content,
+  [role="dialog"] {
+    width: calc(100vw - 24px) !important;
+
+    max-width: calc(100vw - 24px) !important;
+
+    max-height: calc(100vh - 24px) !important;
+
+    margin: 0 auto !important;
+
+    border-radius: 18px !important;
+
+    overflow-x: hidden !important;
+
+    overflow-y: auto !important;
+  }
+
+
+  .modal-content,
+  .booking-modal-content,
+  .booking-dialog-content {
+    width: 100%;
+
+    max-width: 100%;
+
+    padding: 18px !important;
+  }
+
+
+  /* Modal headings */
+
+  .modal h1,
+  .modal h2,
+  .booking-modal h1,
+  .booking-modal h2,
+  .booking-dialog h1,
+  .booking-dialog h2 {
+    font-size: 22px !important;
+
+    line-height: 1.2 !important;
+  }
+
+
+  /* Modal paragraphs */
+
+  .modal p,
+  .booking-modal p,
+  .booking-dialog p {
+    font-size: 14px;
+
+    line-height: 1.5;
+  }
+
+
+  /* -------------------------------------------------------
+     MODAL FOOTER
+     ------------------------------------------------------- */
+
+  .modal-footer,
+  .booking-modal-footer,
+  .booking-dialog-footer {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+    width: 100%;
+  }
+
+  .modal-footer button,
+  .booking-modal-footer button,
+  .booking-dialog-footer button {
+    width: 100%;
+  }
+
+
+  /* =======================================================
+     CONFIRMATION PAGE
+     ======================================================= */
+
+  .confirmation-page,
+  .booking-confirmation,
+  .confirmation-section,
+  .booking-success,
+  .success-page {
+    width: 100%;
+
+    max-width: 100%;
+
+    padding: 35px 16px 50px !important;
+
+    margin: 0 !important;
+  }
+
+
+  /* Confirmation heading */
+
+  .confirmation-page h1,
+  .booking-confirmation h1,
+  .confirmation-section h1,
+  .booking-success h1,
+  .success-page h1 {
+    font-size: clamp(
+      34px,
+      9vw,
+      48px
+    ) !important;
+
+    line-height: 1.05 !important;
+
+    letter-spacing: -1.2px !important;
+
+    margin-bottom: 20px;
+  }
+
+
+  /* Confirmation text */
+
+  .confirmation-page p,
+  .booking-confirmation p,
+  .confirmation-section p,
+  .booking-success p,
+  .success-page p {
+    font-size: 16px !important;
+
+    line-height: 1.55 !important;
+  }
+
+
+  /* -------------------------------------------------------
+     CONFIRMATION DETAILS
+     ------------------------------------------------------- */
+
+  .confirmation-details,
+  .booking-details,
+  .booking-summary,
+  .confirmation-card {
+    width: 100%;
+
+    max-width: 100%;
+  }
+
+
+  /* -------------------------------------------------------
+     CONFIRMATION BUTTONS
+     ------------------------------------------------------- */
+
+  .confirmation-page .buttons,
+  .booking-confirmation .buttons,
+  .confirmation-actions,
+  .booking-confirmation-actions {
+    display: flex;
+
+    flex-direction: column;
+
+    width: 100%;
+
+    gap: 10px;
+  }
+
+  .confirmation-page .buttons a,
+  .confirmation-page .buttons button,
+  .booking-confirmation .buttons a,
+  .booking-confirmation .buttons button,
+  .confirmation-actions a,
+  .confirmation-actions button,
+  .booking-confirmation-actions a,
+  .booking-confirmation-actions button {
+    width: 100%;
+
+    text-align: center;
+  }
+
+
+  /* -------------------------------------------------------
+     FOOTER
+     ------------------------------------------------------- */
+
+  footer {
+    padding-top: 40px;
+
+    padding-bottom: 30px;
+  }
+
+  footer .footer-grid {
+    grid-template-columns: 1fr !important;
+
+    gap: 25px;
+  }
+
+
+  /* -------------------------------------------------------
+     LONG TEXT SAFETY
+     ------------------------------------------------------- */
+
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  span,
+  a,
+  label {
+    overflow-wrap: break-word;
+
+    word-wrap: break-word;
+  }
+}
+
+
+/* =========================================================
+   SMALL PHONES
+   390px / 375px / 360px
+   ========================================================= */
+
+@media (max-width: 420px) {
+
+  .topbar-inner,
+  .hero-section,
+  .trust-strip,
+  .destinations-section,
+  .why-section,
+  .fleet-section,
+  .how-section,
+  .tour-section-inner,
+  footer {
+    width: calc(100% - 24px);
+  }
+
+
+  /* -------------------------------------------------------
+     HERO
+     ------------------------------------------------------- */
+
+  .hero-section {
+    padding-top: 32px;
+
+    padding-bottom: 35px;
+  }
+
+  .hero-section h1 {
+    font-size: 38px;
+  }
+
+
+  /* -------------------------------------------------------
+     MODAL
+     ------------------------------------------------------- */
+
+  .modal-overlay,
+  .booking-overlay,
+  .booking-modal-overlay,
+  .modal-backdrop {
+    padding: 8px !important;
+  }
+
+  .modal,
+  .booking-modal,
+  .booking-dialog,
+  .booking-modal-content,
+  [role="dialog"] {
+    width: calc(100vw - 16px) !important;
+
+    max-width: calc(100vw - 16px) !important;
+
+    max-height: calc(100vh - 16px) !important;
+
+    border-radius: 16px !important;
+  }
+
+  .modal-content,
+  .booking-modal-content,
+  .booking-dialog-content {
+    padding: 15px !important;
+  }
+
+
+  /* -------------------------------------------------------
+     VEHICLE CARDS
+     ------------------------------------------------------- */
+
+  .vehicle-grid,
+  .vehicle-options,
+  .vehicle-selection {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 360px) {
+
+  .hero-section h1 {
+    font-size: 34px;
+  }
+
+  .confirmation-page h1,
+  .booking-confirmation h1,
+  .confirmation-section h1,
+  .booking-success h1,
+  .success-page h1 {
+    font-size: 32px !important;
+  }
+
+  .modal-content,
+  .booking-modal-content,
+  .booking-dialog-content {
+    padding: 13px !important;
+  }
+
+  .button {
+    width: 100%;
+  }
 }

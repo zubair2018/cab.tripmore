@@ -1,20 +1,37 @@
+// ============================================================================
+// TOURS
+// ============================================================================
+
 export const tours = [
   {
     id: 'pahalgam',
     name: 'Srinagar to Pahalgam day tour',
     destination: 'Pahalgam',
   },
+
   {
     id: 'gulmarg',
     name: 'Srinagar to Gulmarg day tour',
     destination: 'Gulmarg',
   },
+
   {
     id: 'sonamarg',
     name: 'Srinagar to Sonamarg day tour',
     destination: 'Sonamarg',
   },
+
+  {
+    id: 'srinagar-local',
+    name: 'Srinagar Local Sightseeing',
+    destination: 'Srinagar Local Sightseeing',
+  },
 ]
+
+
+// ============================================================================
+// VEHICLES
+// ============================================================================
 
 export const vehicles = [
   {
@@ -24,12 +41,8 @@ export const vehicles = [
     luggage: '2 bags',
     icon: '🚘',
     note: 'Comfortable for couples and small families',
-    prices: {
-      pahalgam: 3500,
-      gulmarg: 3000,
-      sonamarg: 3500,
-    },
   },
+
   {
     id: 'innova',
     name: 'Innova',
@@ -37,12 +50,8 @@ export const vehicles = [
     luggage: '4 bags',
     icon: '🚙',
     note: 'A comfortable family choice',
-    prices: {
-      pahalgam: 4000,
-      gulmarg: 3500,
-      sonamarg: 4000,
-    },
   },
+
   {
     id: 'tempo',
     name: 'Tempo Traveller',
@@ -50,12 +59,8 @@ export const vehicles = [
     luggage: '8 bags',
     icon: '🚌',
     note: 'Made for groups travelling together',
-    prices: {
-      pahalgam: 5500,
-      gulmarg: 5000,
-      sonamarg: 5500,
-    },
   },
+
   {
     id: 'urbania',
     name: 'Urbania',
@@ -63,23 +68,30 @@ export const vehicles = [
     luggage: '12 bags',
     icon: '🚐',
     note: 'Spacious transport for larger groups',
-    prices: {
-      pahalgam: 7000,
-      gulmarg: 6000,
-      sonamarg: 7000,
-    },
   },
 ]
 
+
+// ============================================================================
+// DEFAULT PLACES
+// ============================================================================
+//
+// These are ONLY the initial places.
+//
+// IMPORTANT:
+// After the Firebase catalog is created, the dashboard becomes the
+// source of truth for places.
+//
+// Therefore, removing a place from the dashboard will actually remove
+// it from the Booking Dialog.
+//
+// ============================================================================
+
 export const places = [
   'Srinagar',
+  'Sonamarg',
   'Gulmarg',
   'Pahalgam',
-  'Sonamarg',
-  'Doodhpathri',
-  'Yusmarg',
-  'Jammu',
-  'Katra',
-  'Patnitop',
+  'Srinagar Local Sightseeing',
   'Airport',
 ]

@@ -1,11 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
+
 /* =========================================================
-   TRIPMORE HOMEPAGE
-   site.css
+   HOMEPAGE
    ========================================================= */
 
-/* ---------------------------------------------------------
-   SAFETY / BASE
-   --------------------------------------------------------- */
+:root {
+  --paper: #f8f7f2;
+  --surface: #ffffff;
+  --soft: #eef0ea;
+  --ink: #17211b;
+  --muted: #68746c;
+  --green: #1d704c;
+  --green-dark: #124a30;
+  --gold: #f4b35a;
+  --line: #d7d9d1;
+
+  font-family: 'DM Sans', sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+}
 
 *,
 *::before,
@@ -20,7 +33,8 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  overflow-x: hidden;
+  background: var(--paper);
+  color: var(--ink);
 }
 
 button,
@@ -44,11 +58,6 @@ a {
   text-decoration: none;
 }
 
-img {
-  max-width: 100%;
-  display: block;
-}
-
 h1,
 h2,
 h3,
@@ -56,9 +65,8 @@ p {
   margin-top: 0;
 }
 
-
 /* =========================================================
-   SHARED
+   COMMON
    ========================================================= */
 
 .topbar-inner,
@@ -68,7 +76,8 @@ p {
 .why-section,
 .fleet-section,
 .how-section,
-.tour-section-inner {
+.tour-section-inner,
+footer {
   width: min(1100px, calc(100% - 40px));
   margin-inline: auto;
 }
@@ -76,8 +85,8 @@ p {
 .eyebrow {
   margin: 0 0 10px;
   color: var(--green);
-  font: 700 10px/1.3 "DM Mono", monospace;
-  letter-spacing: 1.2px;
+  font: 700 11px 'DM Mono', monospace;
+  letter-spacing: 1px;
 }
 
 .button {
@@ -92,7 +101,6 @@ p {
   font-weight: 700;
   transition:
     background 0.2s ease,
-    color 0.2s ease,
     transform 0.2s ease;
 }
 
@@ -110,24 +118,20 @@ p {
 }
 
 .button-outline {
-  border: 1px solid rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   background: transparent;
   color: #fff;
 }
 
 .button-outline:hover {
-  background: #fff;
-  color: var(--green-dark);
+  background: rgba(255, 255, 255, 0.1);
 }
-
 
 /* =========================================================
    NAVBAR
    ========================================================= */
 
 .topbar {
-  position: relative;
-  z-index: 20;
   width: 100%;
   background: var(--paper);
 }
@@ -148,12 +152,12 @@ p {
   border: 0;
   background: transparent;
   color: var(--ink);
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 700;
 }
 
 .logo-mark {
-  display: inline-grid;
+  display: grid;
   width: 27px;
   height: 27px;
   margin-right: 7px;
@@ -161,7 +165,6 @@ p {
   border-radius: 8px;
   background: var(--green);
   color: #fff;
-  font-size: 13px;
 }
 
 .logo-text > span {
@@ -172,9 +175,9 @@ p {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 24px;
+  gap: 25px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -193,18 +196,8 @@ p {
   border-radius: 8px;
   background: var(--green-dark);
   color: #fff;
-  font-size: 12px;
   font-weight: 700;
-  transition:
-    background 0.2s ease,
-    transform 0.2s ease;
 }
-
-.topbar-button:hover {
-  background: var(--green);
-  transform: translateY(-1px);
-}
-
 
 /* =========================================================
    HERO
@@ -212,11 +205,11 @@ p {
 
 .hero-section {
   display: grid;
-  grid-template-columns: minmax(0, 1.03fr) minmax(0, 0.97fr);
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
   align-items: center;
-  gap: 58px;
-  min-height: 560px;
-  padding: 68px 0 74px;
+  gap: 55px;
+  min-height: 570px;
+  padding: 64px 0;
 }
 
 .hero-copy {
@@ -226,20 +219,19 @@ p {
 .hero-copy h1 {
   max-width: 620px;
   margin: 0;
-  font: 600 clamp(42px, 5vw, 60px)/1.02 "Playfair Display", serif;
+  font: 600 clamp(42px, 5vw, 58px)/1.05 'Playfair Display', serif;
   letter-spacing: -1.5px;
 }
 
 .hero-copy h1 em {
   color: var(--green);
-  font-style: italic;
 }
 
 .hero-description {
-  max-width: 555px;
+  max-width: 570px;
   margin: 22px 0;
   color: var(--muted);
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.7;
 }
 
@@ -251,16 +243,13 @@ p {
 }
 
 .hero-secondary-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--ink);
-  font-size: 12px;
+  color: var(--green-dark);
+  font-size: 13px;
   font-weight: 700;
 }
 
 .hero-secondary-link span {
-  color: var(--green);
+  margin-left: 5px;
 }
 
 .hero-trust {
@@ -269,15 +258,14 @@ p {
   gap: 15px;
   margin-top: 22px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .hero-art {
   position: relative;
-  min-width: 0;
   min-height: 390px;
   overflow: hidden;
-  border-radius: 25px;
+  border-radius: 24px;
   background: #dcebe1;
   isolation: isolate;
 }
@@ -285,109 +273,102 @@ p {
 .hero-art-overlay {
   position: absolute;
   inset: 0;
-  z-index: 1;
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.08),
-      rgba(255, 255, 255, 0)
-    );
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.12),
+    transparent 60%
+  );
 }
 
 .sun {
   position: absolute;
-  z-index: 2;
+  z-index: 1;
   top: 45px;
-  right: 54px;
-  width: 76px;
-  height: 76px;
+  right: 55px;
+  width: 75px;
+  height: 75px;
   border-radius: 50%;
   background: var(--gold);
 }
 
 .mountain {
   position: absolute;
-  z-index: 3;
+  z-index: 2;
   bottom: 60px;
   width: 0;
   height: 0;
-  border-left: 170px solid transparent;
   border-right: 170px solid transparent;
+  border-left: 170px solid transparent;
 }
 
 .mountain-back {
-  left: -75px;
-  border-bottom: 225px solid #8caf8c;
+  left: -80px;
+  border-bottom: 230px solid #7ca77c;
 }
 
 .mountain-middle {
-  left: 27%;
-  border-left-width: 145px;
-  border-right-width: 145px;
-  border-bottom: 195px solid #679572;
+  left: 25%;
+  border-bottom: 205px solid #66956d;
 }
 
 .mountain-front {
-  right: -105px;
+  right: -100px;
   border-bottom: 275px solid #3f785a;
 }
 
 .hero-road {
   position: absolute;
-  z-index: 4;
-  bottom: -70px;
-  left: 30%;
-  width: 53%;
-  height: 245px;
-  transform: rotate(27deg);
+  z-index: 3;
+  bottom: -60px;
+  left: 27%;
+  width: 52%;
+  height: 230px;
+  transform: rotate(28deg);
   border-radius: 80%;
-  background: #f3d19c;
+  background: #f5d6a4;
 }
 
 .hero-car {
   position: absolute;
-  z-index: 6;
+  z-index: 5;
   right: 65px;
-  bottom: 58px;
-  font-size: 65px;
-  filter: drop-shadow(0 7px 8px rgba(0, 0, 0, 0.12));
+  bottom: 52px;
+  font-size: 62px;
 }
 
 .hero-location-card {
   position: absolute;
-  z-index: 7;
-  left: 20px;
+  z-index: 6;
   bottom: 20px;
-  max-width: 210px;
-  padding: 15px 17px;
-  border: 1px solid rgba(255, 255, 255, 0.85);
+  left: 20px;
+  max-width: calc(100% - 40px);
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
   border-radius: 13px;
   background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 8px 25px rgba(23, 33, 27, 0.08);
+  box-shadow: 0 10px 30px rgba(23, 33, 27, 0.08);
 }
 
-.hero-location-card span {
+.hero-location-card > span {
   display: block;
   color: var(--muted);
-  font: 9px "DM Mono", monospace;
-  letter-spacing: 0.7px;
+  font: 9px 'DM Mono', monospace;
 }
 
 .hero-location-card strong {
   display: block;
-  margin-top: 6px;
-  color: var(--ink);
-  font: 600 17px/1.15 "Playfair Display", serif;
+  margin-top: 5px;
+  font: 600 18px/1.15 'Playfair Display', serif;
 }
 
 .hero-rating-card {
   position: absolute;
-  z-index: 8;
-  top: 18px;
-  left: 18px;
+  z-index: 7;
+  top: 20px;
+  left: 20px;
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   padding: 8px 11px;
   border-radius: 9px;
   background: rgba(255, 255, 255, 0.9);
@@ -395,17 +376,15 @@ p {
 
 .hero-rating-card > strong {
   color: var(--green);
-  font-size: 14px;
 }
 
-.hero-rating-card div {
-  display: flex;
-  flex-direction: column;
+.hero-rating-card span,
+.hero-rating-card small {
+  display: block;
 }
 
 .hero-rating-card span {
-  color: var(--ink);
-  font: 700 8px "DM Mono", monospace;
+  font: 700 8px 'DM Mono', monospace;
 }
 
 .hero-rating-card small {
@@ -414,7 +393,6 @@ p {
   font-size: 8px;
 }
 
-
 /* =========================================================
    TRUST STRIP
    ========================================================= */
@@ -422,23 +400,14 @@ p {
 .trust-strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding: 21px 0;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
 }
 
-.trust-strip > div {
+.trust-strip div {
   min-width: 0;
-  padding: 20px 18px;
-  border-right: 1px solid var(--line);
-}
-
-.trust-strip > div:first-child {
-  padding-left: 0;
-}
-
-.trust-strip > div:last-child {
-  padding-right: 0;
-  border-right: 0;
 }
 
 .trust-strip strong,
@@ -448,16 +417,13 @@ p {
 
 .trust-strip strong {
   margin-bottom: 5px;
-  color: var(--ink);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .trust-strip span {
   color: var(--muted);
   font-size: 10px;
-  line-height: 1.4;
 }
-
 
 /* =========================================================
    SECTION HEADINGS
@@ -467,36 +433,37 @@ p {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 35px;
+  gap: 30px;
 }
 
-.section-heading-large h2 {
+.section-heading-large h2,
+.why-intro h2,
+.tour-section h2 {
   margin: 0;
-  font: 600 39px/1.05 "Playfair Display", serif;
-  letter-spacing: -0.7px;
+  font: 600 clamp(34px, 4vw, 43px)/1.05 'Playfair Display', serif;
+  letter-spacing: -0.8px;
 }
 
 .section-heading-large > p {
-  max-width: 300px;
-  margin: 0 0 4px;
+  max-width: 330px;
+  margin: 0;
   color: var(--muted);
   font-size: 12px;
   line-height: 1.6;
 }
-
 
 /* =========================================================
    DESTINATIONS
    ========================================================= */
 
 .destinations-section {
-  padding: 105px 0 100px;
+  padding: 100px 0 80px;
 }
 
 .destination-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
   margin-top: 35px;
 }
 
@@ -505,7 +472,7 @@ p {
   padding: 0;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 15px;
+  border-radius: 14px;
   background: var(--surface);
   text-align: left;
   transition:
@@ -520,60 +487,40 @@ p {
 
 .destination-image {
   position: relative;
-  height: 155px;
+  height: 135px;
   overflow: hidden;
   background: #dcebe1;
 }
 
 .destination-image::before {
-  content: "";
+  content: '';
   position: absolute;
-  left: -20%;
-  bottom: -35px;
-  width: 80%;
-  height: 120px;
-  border-radius: 50%;
-  background: #669875;
+  width: 180px;
+  height: 90px;
+  left: -25px;
+  bottom: -30px;
+  border-radius: 50% 50% 0 0;
+  background: #66956d;
 }
 
 .destination-image::after {
-  content: "";
+  content: '';
   position: absolute;
-  right: -15%;
-  bottom: -45px;
-  width: 55%;
-  height: 140px;
+  width: 100px;
+  height: 100px;
+  right: -20px;
+  top: 20px;
   border-radius: 50%;
-  background: #f2cf94;
+  background: #f2cf8d;
 }
 
-.destination-image span {
+.destination-image > span {
   position: absolute;
   z-index: 3;
   top: 12px;
-  left: 13px;
-  color: rgba(23, 33, 27, 0.6);
-  font: 700 9px "DM Mono", monospace;
-}
-
-.destination-2 {
-  background: #e2ede2;
-}
-
-.destination-3 {
-  background: #e5efe6;
-}
-
-.destination-4 {
-  background: #d9e8df;
-}
-
-.destination-5 {
-  background: #e4ece2;
-}
-
-.destination-6 {
-  background: #dae9df;
+  left: 12px;
+  color: rgba(23, 33, 27, 0.55);
+  font: 10px 'DM Mono', monospace;
 }
 
 .destination-content {
@@ -581,19 +528,18 @@ p {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 14px 15px;
+  padding: 13px;
 }
 
 .destination-content h3 {
   margin: 0;
-  color: var(--ink);
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .destination-content > span {
-  flex-shrink: 0;
   color: var(--muted);
   font-size: 9px;
+  white-space: nowrap;
 }
 
 .destination-content strong {
@@ -601,17 +547,10 @@ p {
 }
 
 .homepage-empty {
-  margin-top: 30px;
-  padding: 35px;
-  border: 1px dashed var(--line);
+  padding: 30px;
+  color: var(--muted);
   text-align: center;
 }
-
-.homepage-empty p {
-  margin: 0;
-  color: var(--muted);
-}
-
 
 /* =========================================================
    WHY TRIPMORE
@@ -619,21 +558,15 @@ p {
 
 .why-section {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  grid-template-columns: 0.9fr 1.1fr;
   gap: 70px;
   align-items: start;
-  padding: 95px 0;
-}
-
-.why-intro h2 {
-  margin: 0;
-  font: 600 39px/1.04 "Playfair Display", serif;
-  letter-spacing: -0.7px;
+  padding: 90px 0;
 }
 
 .why-intro > p:not(.eyebrow) {
-  max-width: 440px;
-  margin: 20px 0 24px;
+  max-width: 460px;
+  margin: 20px 0;
   color: var(--muted);
   font-size: 13px;
   line-height: 1.7;
@@ -641,7 +574,7 @@ p {
 
 .benefits-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
 }
 
@@ -654,19 +587,12 @@ p {
 }
 
 .benefit-number {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 29px;
-  height: 29px;
-  border-radius: 7px;
-  background: var(--soft);
   color: var(--green);
-  font: 700 9px "DM Mono", monospace;
+  font: 700 10px 'DM Mono', monospace;
 }
 
 .benefit-card h3 {
-  margin: 18px 0 8px;
+  margin: 25px 0 8px;
   font-size: 14px;
 }
 
@@ -674,16 +600,15 @@ p {
   margin: 0;
   color: var(--muted);
   font-size: 11px;
-  line-height: 1.55;
+  line-height: 1.6;
 }
-
 
 /* =========================================================
    FLEET
    ========================================================= */
 
 .fleet-section {
-  padding: 95px 0;
+  padding: 90px 0;
 }
 
 .fleet-heading {
@@ -692,7 +617,7 @@ p {
 
 .fleet-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 13px;
 }
 
@@ -712,73 +637,62 @@ p {
 
 .fleet-number {
   color: var(--green);
-  font: 700 9px "DM Mono", monospace;
+  font: 700 10px 'DM Mono', monospace;
 }
 
 .fleet-arrow {
   color: var(--muted);
-  font-size: 15px;
 }
 
 .fleet-icon {
-  display: grid;
-  width: 58px;
-  height: 58px;
-  margin: 25px 0 17px;
-  place-items: center;
-  border-radius: 14px;
-  background: var(--soft);
-  font-size: 27px;
+  margin: 25px 0 12px;
+  font-size: 38px;
 }
 
 .fleet-card h3 {
-  margin: 0 0 8px;
-  font-size: 16px;
+  margin-bottom: 8px;
+  font-size: 17px;
 }
 
 .fleet-card p {
-  min-height: 50px;
-  margin: 0 0 18px;
+  min-height: 48px;
+  margin-bottom: 18px;
   color: var(--muted);
   font-size: 11px;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
-.fleet-card > button {
+.fleet-card button {
   width: 100%;
-  min-height: 38px;
-  padding: 0 10px;
-  border: 1px solid var(--line);
+  min-height: 40px;
+  border: 0;
   border-radius: 8px;
-  background: var(--paper);
-  color: var(--ink);
-  font-size: 10px;
+  background: var(--soft);
+  color: var(--green-dark);
+  font-size: 11px;
   font-weight: 700;
 }
 
-.fleet-card > button span {
+.fleet-card button span {
   margin-left: 5px;
-  color: var(--green);
 }
-
 
 /* =========================================================
    HOW IT WORKS
    ========================================================= */
 
 .how-section {
-  padding: 95px 0;
+  padding: 90px 0;
 }
 
 .steps {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
   margin-top: 35px;
 }
 
 .step-card {
-  min-width: 0;
   padding: 24px;
   border: 1px solid var(--line);
   border-radius: 15px;
@@ -787,7 +701,7 @@ p {
 
 .step-card > span {
   color: var(--green);
-  font: 700 11px "DM Mono", monospace;
+  font: 700 11px 'DM Mono', monospace;
 }
 
 .step-card h3 {
@@ -799,33 +713,29 @@ p {
   margin: 0;
   color: var(--muted);
   font-size: 12px;
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
-
 /* =========================================================
-   TOUR ROUTES
+   TOUR SECTION
    ========================================================= */
 
 .tour-section {
-  padding: 25px 0 95px;
+  padding: 20px 0 90px;
 }
 
 .tour-section-inner {
   display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-  gap: 50px;
-  align-items: start;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 60px;
+  align-items: center;
 }
 
 .tour-section h2 {
-  margin: 0 0 12px;
-  font: 600 38px/1.05 "Playfair Display", serif;
+  margin-bottom: 15px;
 }
 
-.tour-section-inner > div:first-child > p:last-child {
-  max-width: 360px;
-  margin: 0;
+.tour-section p:not(.eyebrow) {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.6;
@@ -842,29 +752,13 @@ p {
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 14px 15px;
+  min-height: 55px;
+  padding: 0 15px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--surface);
   color: var(--ink);
   text-align: left;
-  transition:
-    border-color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.tour-route:hover {
-  border-color: var(--green);
-  transform: translateX(2px);
-}
-
-.tour-route span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 11px;
-  font-weight: 600;
 }
 
 .tour-route strong {
@@ -872,14 +766,9 @@ p {
 }
 
 .tour-route small {
-  padding: 5px 8px;
-  border-radius: 6px;
-  background: var(--soft);
   color: var(--green);
-  font-size: 9px;
   font-weight: 700;
 }
-
 
 /* =========================================================
    FINAL CTA
@@ -889,10 +778,10 @@ p {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 35px;
+  gap: 30px;
   width: min(1100px, calc(100% - 40px));
-  margin: 0 auto 85px;
-  padding: 44px;
+  margin: 0 auto 80px;
+  padding: 42px;
   border-radius: 22px;
   background: var(--green-dark);
   color: #fff;
@@ -903,36 +792,36 @@ p {
 }
 
 .fleet-callout h2 {
-  max-width: 650px;
+  max-width: 620px;
   margin: 0;
-  font: 600 39px/1.06 "Playfair Display", serif;
+  font: 600 clamp(30px, 4vw, 42px)/1.08 'Playfair Display', serif;
 }
 
 .fleet-callout p:not(.eyebrow) {
-  max-width: 580px;
-  margin: 14px 0 0;
+  max-width: 550px;
+  margin: 15px 0 0;
   color: rgba(255, 255, 255, 0.7);
   font-size: 12px;
   line-height: 1.6;
 }
-
 
 /* =========================================================
    FOOTER
    ========================================================= */
 
 footer {
-  width: min(1100px, calc(100% - 40px));
-  margin-inline: auto;
-  padding: 38px 0 25px;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 35px;
+  padding: 45px 0 25px;
   border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .footer-brand strong {
-  display: flex;
-  align-items: center;
   color: var(--ink);
-  font-size: 18px;
+  font-size: 17px;
 }
 
 .footer-brand strong > span:last-child {
@@ -941,29 +830,22 @@ footer {
 
 .footer-mark {
   display: inline-grid;
-  width: 23px;
-  height: 23px;
-  margin-right: 6px;
+  width: 22px;
+  height: 22px;
+  margin-right: 4px;
   place-items: center;
   border-radius: 6px;
   background: var(--green);
   color: #fff;
-  font-size: 11px;
 }
 
 .footer-brand p {
   margin: 8px 0 0;
-  color: var(--muted);
-  font-size: 11px;
 }
 
 .footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin: 25px 0;
-  color: var(--muted);
-  font-size: 11px;
+  display: grid;
+  gap: 8px;
 }
 
 .footer-links a:hover {
@@ -971,43 +853,36 @@ footer {
 }
 
 .footer-contact {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  color: var(--muted);
-  font-size: 10px;
+  display: grid;
+  align-content: start;
+  gap: 8px;
 }
 
 .footer-bottom {
+  grid-column: 1 / -1;
   display: flex;
   justify-content: space-between;
-  gap: 15px;
-  margin-top: 30px;
-  padding-top: 18px;
+  padding-top: 20px;
   border-top: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
 }
-
 
 /* =========================================================
    TABLET
    ========================================================= */
 
 @media (max-width: 900px) {
-
   .hero-section {
     grid-template-columns: 1fr;
-    gap: 40px;
-    padding: 55px 0 65px;
+    gap: 35px;
   }
 
   .hero-copy {
-    max-width: 720px;
+    max-width: 700px;
   }
 
   .hero-art {
-    min-height: 360px;
+    min-height: 340px;
   }
 
   .why-section {
@@ -1016,7 +891,7 @@ footer {
   }
 
   .fleet-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .tour-section-inner {
@@ -1025,13 +900,11 @@ footer {
   }
 }
 
-
 /* =========================================================
    MOBILE
    ========================================================= */
 
 @media (max-width: 700px) {
-
   .topbar-inner,
   .hero-section,
   .trust-strip,
@@ -1041,65 +914,50 @@ footer {
   .how-section,
   .tour-section-inner,
   footer {
-    width: calc(100% - 32px);
+    width: calc(100% - 28px);
   }
-
-  /* NAVBAR */
 
   .topbar-inner {
-    min-height: 64px;
-    gap: 10px;
-  }
-
-  .logo {
-    font-size: 17px;
-  }
-
-  .logo-mark {
-    width: 24px;
-    height: 24px;
-    margin-right: 5px;
-    border-radius: 7px;
+    min-height: 65px;
   }
 
   .navigation {
     display: none;
   }
 
-  .topbar-button {
-    padding: 9px 12px;
-    font-size: 10px;
+  .logo {
+    font-size: 18px;
   }
 
+  .logo-mark {
+    width: 24px;
+    height: 24px;
+  }
 
-  /* HERO */
+  .topbar-button {
+    padding: 9px 11px;
+    font-size: 11px;
+  }
 
   .hero-section {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 30px;
     min-height: auto;
-    padding: 42px 0 48px;
+    padding: 42px 0 50px;
   }
 
   .hero-copy h1 {
-    max-width: 100%;
-    font-size: clamp(38px, 11vw, 48px);
+    font-size: 42px;
     line-height: 1.02;
-    letter-spacing: -1px;
   }
 
   .hero-description {
-    margin: 18px 0;
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.65;
   }
 
   .hero-actions {
     align-items: stretch;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
   }
 
   .hero-actions .button {
@@ -1107,157 +965,103 @@ footer {
   }
 
   .hero-secondary-link {
-    justify-content: center;
-    padding: 7px;
+    padding: 8px 0;
+    text-align: center;
   }
 
   .hero-trust {
-    justify-content: flex-start;
+    justify-content: center;
     gap: 8px 12px;
-    margin-top: 17px;
-  }
-
-  .hero-trust span {
-    font-size: 9px;
   }
 
   .hero-art {
-    width: 100%;
-    min-height: 300px;
-    border-radius: 20px;
+    min-height: 285px;
+    border-radius: 18px;
   }
 
   .sun {
-    top: 34px;
-    right: 34px;
-    width: 57px;
-    height: 57px;
+    top: 32px;
+    right: 32px;
+    width: 55px;
+    height: 55px;
   }
 
   .mountain {
-    bottom: 48px;
+    bottom: 45px;
+    border-right-width: 120px;
+    border-left-width: 120px;
   }
 
   .mountain-back {
-    left: -125px;
-    border-left-width: 150px;
-    border-right-width: 150px;
-    border-bottom-width: 180px;
+    left: -70px;
+    border-bottom-width: 170px;
   }
 
   .mountain-middle {
-    left: 18%;
-    border-left-width: 125px;
-    border-right-width: 125px;
-    border-bottom-width: 160px;
+    left: 20%;
+    border-bottom-width: 155px;
   }
 
   .mountain-front {
-    right: -135px;
-    border-left-width: 155px;
-    border-right-width: 155px;
+    right: -90px;
     border-bottom-width: 205px;
   }
 
   .hero-road {
-    bottom: -75px;
-    left: 25%;
-    width: 68%;
-    height: 210px;
+    left: 20%;
+    width: 65%;
+    height: 180px;
   }
 
   .hero-car {
     right: 25px;
-    bottom: 52px;
+    bottom: 42px;
     font-size: 48px;
   }
 
   .hero-location-card {
-    left: 14px;
-    bottom: 14px;
-    max-width: 175px;
-    padding: 11px 12px;
-    border-radius: 10px;
+    left: 12px;
+    bottom: 12px;
+    padding: 10px 12px;
   }
 
   .hero-location-card strong {
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .hero-rating-card {
     top: 12px;
     left: 12px;
-    padding: 7px 9px;
   }
-
-
-  /* TRUST */
 
   .trust-strip {
     grid-template-columns: 1fr 1fr;
+    gap: 16px 10px;
+    padding: 18px 0;
   }
-
-  .trust-strip > div {
-    padding: 14px 10px;
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .trust-strip > div:nth-child(odd) {
-    padding-left: 0;
-  }
-
-  .trust-strip > div:nth-child(even) {
-    padding-right: 0;
-  }
-
-  .trust-strip > div:nth-child(3),
-  .trust-strip > div:nth-child(4) {
-    border-bottom: 0;
-  }
-
-  .trust-strip strong {
-    font-size: 10px;
-  }
-
-  .trust-strip span {
-    font-size: 9px;
-  }
-
-
-  /* HEADINGS */
 
   .section-heading-large {
     display: block;
   }
 
-  .section-heading-large h2,
-  .why-intro h2 {
-    font-size: 32px;
-    line-height: 1.05;
-  }
-
   .section-heading-large > p {
-    max-width: 100%;
-    margin-top: 16px;
-    font-size: 11px;
+    margin-top: 18px;
   }
 
-
-  /* DESTINATIONS */
-
-  .destinations-section {
-    padding: 70px 0;
+  .destinations-section,
+  .why-section,
+  .fleet-section,
+  .how-section {
+    padding: 65px 0;
   }
 
   .destination-grid {
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 25px;
+    gap: 9px;
   }
 
   .destination-image {
-    height: 115px;
+    height: 110px;
   }
 
   .destination-content {
@@ -1265,51 +1069,17 @@ footer {
     padding: 11px;
   }
 
-  .destination-content h3 {
-    font-size: 13px;
-  }
-
   .destination-content > span {
     display: block;
-    margin-top: 5px;
-    font-size: 8px;
-  }
-
-
-  /* WHY */
-
-  .why-section {
-    padding: 70px 0;
-    gap: 30px;
-  }
-
-  .why-intro > p:not(.eyebrow) {
-    font-size: 12px;
+    margin-top: 6px;
   }
 
   .benefits-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 9px;
+    grid-template-columns: 1fr;
   }
 
   .benefit-card {
-    padding: 15px;
-  }
-
-  .benefit-card h3 {
-    margin-top: 14px;
-    font-size: 12px;
-  }
-
-  .benefit-card p {
-    font-size: 9px;
-  }
-
-
-  /* FLEET */
-
-  .fleet-section {
-    padding: 70px 0;
+    padding: 18px;
   }
 
   .fleet-grid {
@@ -1318,248 +1088,77 @@ footer {
   }
 
   .fleet-card {
-    padding: 15px;
+    padding: 16px;
   }
 
   .fleet-icon {
-    width: 48px;
-    height: 48px;
-    margin: 18px 0 13px;
-    font-size: 22px;
+    font-size: 30px;
+    margin: 20px 0 10px;
   }
 
   .fleet-card h3 {
-    font-size: 14px;
-  }
-
-  .fleet-card p {
-    min-height: 60px;
-    font-size: 9px;
-  }
-
-  .fleet-card > button {
-    font-size: 9px;
-  }
-
-
-  /* HOW IT WORKS */
-
-  .how-section {
-    padding: 70px 0;
-  }
-
-  .steps {
-    grid-template-columns: 1fr;
-    gap: 10px;
-    margin-top: 25px;
-  }
-
-  .step-card {
-    padding: 19px;
-  }
-
-  .step-card h3 {
-    margin: 17px 0 7px;
     font-size: 15px;
-  }
-
-  .step-card p {
-    font-size: 11px;
-  }
-
-
-  /* TOURS */
-
-  .tour-section {
-    padding: 10px 0 65px;
-  }
-
-  .tour-section h2 {
-    font-size: 32px;
-  }
-
-  .tour-route-list {
-    gap: 7px;
-  }
-
-  .tour-route {
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
-    gap: 7px;
-    padding: 12px 10px;
-  }
-
-  .tour-route span {
-    font-size: 9px;
-  }
-
-  .tour-route small {
-    padding: 4px 6px;
-    font-size: 8px;
-  }
-
-
-  /* CTA */
-
-  .fleet-callout {
-    width: calc(100% - 32px);
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 25px;
-    margin-bottom: 55px;
-    padding: 30px 22px;
-    border-radius: 18px;
-  }
-
-  .fleet-callout h2 {
-    font-size: 29px;
-    line-height: 1.08;
-  }
-
-  .fleet-callout p:not(.eyebrow) {
-    font-size: 10px;
-  }
-
-  .fleet-callout .button {
-    width: 100%;
-  }
-
-
-  /* FOOTER */
-
-  footer {
-    padding: 30px 0 20px;
-  }
-
-  .footer-links {
-    gap: 13px;
-  }
-
-  .footer-contact {
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .footer-bottom {
-    flex-direction: column;
-    gap: 7px;
-  }
-}
-
-
-/* =========================================================
-   SMALL PHONES
-   ========================================================= */
-
-@media (max-width: 420px) {
-
-  .topbar-inner,
-  .hero-section,
-  .trust-strip,
-  .destinations-section,
-  .why-section,
-  .fleet-section,
-  .how-section,
-  .tour-section-inner,
-  footer {
-    width: calc(100% - 24px);
-  }
-
-  .topbar-inner {
-    min-height: 60px;
-  }
-
-  .logo {
-    font-size: 16px;
-  }
-
-  .logo-mark {
-    width: 22px;
-    height: 22px;
-    font-size: 10px;
-  }
-
-  .topbar-button {
-    padding: 8px 10px;
-    font-size: 9px;
-  }
-
-  .hero-section {
-    padding-top: 35px;
-  }
-
-  .hero-copy h1 {
-    font-size: 39px;
-  }
-
-  .hero-description {
-    font-size: 12px;
-  }
-
-  .hero-art {
-    min-height: 270px;
-  }
-
-  .hero-location-card {
-    max-width: 160px;
-  }
-
-  .hero-location-card strong {
-    font-size: 13px;
-  }
-
-  .destination-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .destination-image {
-    height: 100px;
-  }
-
-  .benefits-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .fleet-grid {
-    grid-template-columns: 1fr;
   }
 
   .fleet-card p {
     min-height: auto;
   }
 
-  .section-heading-large h2,
-  .why-intro h2,
-  .tour-section h2 {
-    font-size: 29px;
+  .steps {
+    grid-template-columns: 1fr;
+  }
+
+  .tour-section {
+    padding-bottom: 65px;
   }
 
   .tour-route {
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: 1fr auto 1fr auto;
+    gap: 7px;
+    padding: 0 10px;
+    font-size: 11px;
   }
 
-  .tour-route small {
-    display: none;
+  .fleet-callout {
+    width: calc(100% - 28px);
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 55px;
+    padding: 30px 22px;
+    border-radius: 18px;
   }
 
-  .fleet-callout h2 {
-    font-size: 27px;
+  .fleet-callout .button {
+    width: 100%;
+  }
+
+  footer {
+    grid-template-columns: 1fr;
+    gap: 25px;
+    padding: 35px 0 20px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: 6px;
   }
 }
 
-
 /* =========================================================
-   VERY SMALL PHONES
+   SMALL PHONES
    ========================================================= */
 
-@media (max-width: 350px) {
-
-  .hero-copy h1 {
-    font-size: 35px;
+@media (max-width: 390px) {
+  .topbar-button {
+    padding-inline: 9px;
   }
 
-  .hero-trust {
-    flex-direction: column;
-    gap: 6px;
+  .hero-copy h1 {
+    font-size: 37px;
+  }
+
+  .hero-art {
+    min-height: 260px;
   }
 
   .destination-grid {
@@ -1570,16 +1169,19 @@ footer {
     height: 125px;
   }
 
+  .fleet-grid {
+    grid-template-columns: 1fr;
+  }
+
   .trust-strip {
     grid-template-columns: 1fr;
   }
 
-  .trust-strip > div {
-    padding: 12px 0;
-    border-bottom: 1px solid var(--line);
+  .tour-route {
+    grid-template-columns: 1fr auto 1fr;
   }
 
-  .trust-strip > div:last-child {
-    border-bottom: 0;
+  .tour-route small {
+    display: none;
   }
 }
