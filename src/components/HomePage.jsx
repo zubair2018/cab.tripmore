@@ -68,22 +68,26 @@ export default function HomePage({ onBook }) {
       ========================== */}
       <header className="topbar">
         <div className="topbar-inner">
-          <button
-            className="logo"
-            type="button"
-            onClick={() =>
-              window.scrollTo({
-                top: 0,
-                behavior: 'smooth',
-              })
-            }
-          >
-            <span className="logo-mark">✦</span>
+  <button
+  className="logo"
+  type="button"
+  onClick={() =>
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
+  }
+>
+  <img
+    src="/tripmore-logo.png"
+    alt="Tripmore"
+    className="tripmore-logo"
+  />
 
-            <span className="logo-text">
-              tripmore<span>.in</span>
-            </span>
-          </button>
+  <span className="logo-text">
+    tripmore<span>.in</span>
+  </span>
+</button>
 
           <nav className="navigation">
             <a href="#destinations">Destinations</a>
@@ -494,6 +498,25 @@ export default function HomePage({ onBook }) {
       </main>
 
       {/* =========================
+    WHATSAPP FLOATING BUTTON
+========================== */}
+<a
+  href="https://wa.me/916006204242"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="whatsapp-float"
+  aria-label="Chat with Tripmore on WhatsApp"
+>
+  <span className="whatsapp-icon">
+    ☎
+  </span>
+
+  <span className="whatsapp-tooltip">
+    Chat with us on WhatsApp
+  </span>
+</a>
+
+      {/* =========================
           FOOTER
       ========================== */}
       <footer>
@@ -517,7 +540,7 @@ export default function HomePage({ onBook }) {
 
         <div className="footer-contact">
           <span>Srinagar, Jammu & Kashmir</span>
-          <span>info@tripmore.in</span>
+          <span>tripmore14@gmail.com</span>
         </div>
 
         <div className="footer-bottom">
