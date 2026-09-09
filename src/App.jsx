@@ -4,6 +4,7 @@ import BookingConfirmation from './components/BookingConfirmation'
 import BookingDialog from './components/BookingDialog'
 import HomePage from './components/HomePage'
 import AdminPage from './components/AdminPage'
+import LegalPage from './components/LegalPage'
 
 import { isFirebaseConfigured } from './services/firebase'
 import { saveBookingToFirebase } from './services/bookings'
@@ -19,6 +20,9 @@ export default function App() {
   const [dialogOpen, setDialogOpen] =
     useState(false)
 
+  const [initialDestination, setInitialDestination] =
+    useState('')
+
   if (
     window.location.pathname ===
     '/admin'
@@ -32,9 +36,25 @@ export default function App() {
     )
   }
 
-  function openBooking() {
+  // Static legal pages, routed by pathname like /admin above.
+  // vercel.json rewrites every path to index.html, so these work on
+  // direct access and refresh.
+  const legalPage = {
+    '/terms': 'terms',
+    '/disclaimer': 'disclaimer',
+    '/refund-policy': 'refund',
+  }[window.location.pathname]
+
+  if (legalPage) {
+    return <LegalPage page={legalPage} />
+  }
+
+  function openBooking(destination) {
     setBooking(null)
     setBookingError('')
+    setInitialDestination(
+      typeof destination === 'string' ? destination : '',
+    )
     setDialogOpen(true)
   }
 
@@ -98,6 +118,7 @@ export default function App() {
           }}
           onBook={saveBooking}
           error={bookingError}
+          initialDestination={initialDestination}
         />
       )}
 

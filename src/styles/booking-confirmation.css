@@ -455,3 +455,111 @@
     padding-bottom: 100px;
   }
 }
+
+
+/* =========================================================
+   PAYMENT (Step 5 — Razorpay)
+   ========================================================= */
+
+.confirmation-payment {
+  margin-top: 28px;
+
+  padding: 22px 24px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+
+  background: #f3f7f4;
+
+  border: 1px solid #dce9e2;
+  border-radius: 16px;
+}
+
+.payment-button {
+  min-height: 54px;
+
+  padding: 0 26px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-radius: 12px;
+
+  background: #19734f;
+  color: #ffffff;
+
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow: 0 10px 24px rgba(25, 115, 79, 0.18);
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.payment-button:hover:not(:disabled) {
+  background: #145f41;
+
+  transform: translateY(-2px);
+
+  box-shadow: 0 14px 28px rgba(25, 115, 79, 0.24);
+}
+
+.payment-button:disabled {
+  opacity: 0.65;
+  cursor: progress;
+
+  box-shadow: none;
+}
+
+.confirmation-payment small {
+  color: #60717b;
+
+  font-size: 13px;
+}
+
+.payment-paid {
+  margin: 0;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  color: #166534;
+
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.payment-paid span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 24px;
+  height: 24px;
+
+  border-radius: 50%;
+
+  background: #dcfce7;
+
+  font-size: 14px;
+}
+
+.payment-error {
+  margin: 0;
+
+  color: #b91c1c;
+
+  font-size: 13px;
+  font-weight: 600;
+}

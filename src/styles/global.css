@@ -1592,3 +1592,193 @@ footer {
     display: none;
   }
 }
+
+/* =========================================================
+   EXPLORE KASHMIR - DESTINATION IMAGES
+   ========================================================= */
+
+.destination-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 20px;
+}
+
+.destination-card {
+  display: block;
+
+  width: 100%;
+
+  padding: 0;
+
+  overflow: hidden;
+
+  border: 1px solid var(--border);
+
+  background: var(--surface);
+
+  border-radius: var(--radius-md);
+
+  box-shadow: var(--shadow-sm);
+
+  text-align: left;
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.destination-card:hover {
+  transform: translateY(-5px);
+
+  box-shadow: var(--shadow-md);
+}
+
+
+/* IMAGE */
+
+.destination-image {
+  position: relative;
+
+  width: 100%;
+
+  height: 250px;
+
+  overflow: hidden;
+
+  background: #dfe5e1;
+}
+
+.destination-image img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  max-width: none;
+
+  object-fit: cover;
+
+  transition: transform 0.5s ease;
+}
+
+.destination-card:hover .destination-image img {
+  transform: scale(1.06);
+}
+
+
+/* NUMBER */
+
+.destination-image > span {
+  position: absolute;
+
+  top: 14px;
+  left: 14px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 38px;
+  height: 38px;
+
+  border-radius: 50%;
+
+  background: rgba(7, 27, 38, 0.75);
+
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  letter-spacing: 0.05em;
+
+  backdrop-filter: blur(5px);
+}
+
+
+/* CONTENT */
+
+.destination-content {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding: 18px 20px;
+}
+
+.destination-content h3 {
+  margin: 0;
+
+  font-size: 21px;
+
+  line-height: 1.2;
+}
+
+.destination-content span {
+  color: var(--green);
+
+  font-size: 13px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.destination-content strong {
+  margin-left: 3px;
+
+  font-size: 16px;
+}
+
+
+/* =========================================================
+   DESTINATION RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .destination-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .destination-image {
+    height: 230px;
+  }
+}
+
+
+@media (max-width: 600px) {
+
+  .destination-grid {
+    grid-template-columns: 1fr;
+
+    gap: 14px;
+  }
+
+  .destination-image {
+    height: 240px;
+  }
+
+  .destination-content {
+    padding: 16px;
+  }
+
+  .destination-content h3 {
+    font-size: 19px;
+  }
+}
+
+
+@media (max-width: 420px) {
+
+  .destination-image {
+    height: 220px;
+  }
+}

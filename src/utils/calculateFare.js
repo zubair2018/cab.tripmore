@@ -1,265 +1,132 @@
 /*
 |--------------------------------------------------------------------------
-| CALCULATE FARE
+| TRIPMORE PRICING — single source of truth
 |--------------------------------------------------------------------------
 |
-| 1 day:
-| Fare depends on From → To.
+| The booking flow and the admin dashboard both use the helpers in this
+| file, so prices set in the dashboard are exactly what customers pay.
 |
-| 2-5 days:
-| Fare depends only on number of days.
+| Price store shape (catalog.prices):
+|
+|   {
+|     1: {                          // single-day fares, keyed by DESTINATION slug
+|       gulmarg:  { sedan, innova, tempo, urbania },
+|       pahalgam: { sedan, innova, tempo, urbania },
+|       airport:  { sedan, innova, tempo, urbania },
+|       ...
+|     },
+|     2: { sedan, innova, tempo, urbania },   // multi-day packages, keyed by day count
+|     3: { sedan, innova, tempo, urbania },
+|     ...
+|   }
+|
+| RULES
+| - 1 day: fare depends on the DESTINATION (the non-hub endpoint of the
+|   route). Pricing is bidirectional — Srinagar → Gulmarg and
+|   Gulmarg → Srinagar both use prices[1].gulmarg.
+| - 2+ days: fare depends only on the number of days + vehicle (a package),
+|   independent of the route.
+| - A price of 0 (or missing) means "not available" for that combination.
 |
 |--------------------------------------------------------------------------
 */
 
-export function calculateFare({
-  vehicle,
-  days,
-  from,
-  to,
-  catalog,
-}) {
-  if (
-    !vehicle ||
-    !catalog
-  ) {
-    return {
-      base: 0,
-      total: 0,
-    }
-  }
-
-
-  const numberOfDays =
-    Number(days || 1)
-
-
-  const vehicleId =
-    vehicle.id
-
-
-  /*
-   * 1 DAY
-   */
-
-  if (
-    numberOfDays === 1
-  ) {
-    const price =
-      getSingleDayPrice({
-        catalog,
-        vehicleId,
-        from,
-        to,
-      })
-
-
-    return {
-      base: price,
-      total: price,
-    }
-  }
-
-
-  /*
-   * 2-5 DAYS
-   */
-
-  const packagePrice =
-    Number(
-      catalog.prices?.[
-        numberOfDays
-      ]?.[
-        vehicleId
-      ] || 0,
-    )
-
-
-  return {
-    base: packagePrice,
-    total: packagePrice,
-  }
-}
+// Trips originate from the hub; the hub itself is never a priced destination.
+export const HUB = 'srinagar'
 
 
 /*
 |--------------------------------------------------------------------------
-| NORMALIZE PLACE
+| placeKey — turn a place name into a stable slug used as a price key
 |--------------------------------------------------------------------------
+|
+| "Gulmarg"                    -> "gulmarg"
+| "Srinagar Local Sightseeing" -> "srinagar-local-sightseeing"
+| "Airport"                    -> "airport"
+|
 */
-
-function normalizePlace(
-  value,
-) {
-  return String(
-    value || '',
-  )
+export function placeKey(name) {
+  return String(name || '')
     .trim()
     .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
 }
 
 
 /*
 |--------------------------------------------------------------------------
-| SINGLE DAY PRICE
+| destinationPlaces — priceable single-day destinations (excludes the hub)
 |--------------------------------------------------------------------------
 */
-
-function getSingleDayPrice({
-  catalog,
-  vehicleId,
-  from,
-  to,
-}) {
-  const fromPlace =
-    normalizePlace(
-      from,
-    )
-
-  const toPlace =
-    normalizePlace(
-      to,
-    )
+export function destinationPlaces(places) {
+  return (places || []).filter(
+    (place) => placeKey(place) !== HUB,
+  )
+}
 
 
-  /*
-   * Do not calculate anything
-   * until both places are selected.
-   */
+/*
+|--------------------------------------------------------------------------
+| maxPackageDays — highest configured multi-day package (>= 2)
+|--------------------------------------------------------------------------
+|
+| Used to cap the day counter so customers can never pick a day count that
+| has no price. Returns 1 when only single-day pricing exists.
+*/
+export function maxPackageDays(prices) {
+  const days = Object.keys(prices || {})
+    .map(Number)
+    .filter((n) => Number.isInteger(n) && n >= 2)
 
-  if (
-    !fromPlace ||
-    !toPlace
-  ) {
+  return days.length ? Math.max(...days) : 1
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| getSingleDayPrice — price for a one-day route
+|--------------------------------------------------------------------------
+|
+| Looks up the non-hub endpoint (destination). Tries the "to" place first,
+| then the "from" place, so reverse journeys are priced the same.
+*/
+export function getSingleDayPrice(prices, from, to, vehicleId) {
+  if (!prices || !vehicleId) {
     return 0
   }
 
+  const dayOne = prices[1] || {}
 
-  /*
-   * Srinagar Local Seeing
-   */
+  const fromKey = placeKey(from)
+  const toKey = placeKey(to)
 
-  if (
-    (
-      fromPlace ===
-        'srinagar' &&
-      toPlace ===
-        'srinagar local seeing'
-    ) ||
-    (
-      fromPlace ===
-        'srinagar local seeing' &&
-      toPlace ===
-        'srinagar'
-    )
-  ) {
-    return Number(
-      catalog.prices?.[1]?.[
-        'srinagar-local'
-      ]?.[
-        vehicleId
-      ] || 0,
-    )
+  if (!fromKey || !toKey) {
+    return 0
   }
 
+  // The priced endpoint is whichever side is NOT the hub.
+  const candidates = []
 
-  /*
-   * Airport ↔ Srinagar
-   */
-
-  if (
-    (
-      fromPlace ===
-        'airport' &&
-      toPlace ===
-        'srinagar'
-    ) ||
-    (
-      fromPlace ===
-        'srinagar' &&
-      toPlace ===
-        'airport'
-    )
-  ) {
-    return Number(
-      catalog.prices?.[1]?.[
-        'airport'
-      ]?.[
-        vehicleId
-      ] || 0,
-    )
+  if (toKey && toKey !== HUB) {
+    candidates.push(toKey)
   }
 
-
-  /*
-   * Srinagar ↔ Gulmarg
-   */
-
-  if (
-    isRoute(
-      fromPlace,
-      toPlace,
-      'srinagar',
-      'gulmarg',
-    )
-  ) {
-    return Number(
-      catalog.prices?.[1]?.[
-        'gulmarg'
-      ]?.[
-        vehicleId
-      ] || 0,
-    )
+  if (fromKey && fromKey !== HUB) {
+    candidates.push(fromKey)
   }
 
+  for (const key of candidates) {
+    const entry = dayOne[key]
 
-  /*
-   * Srinagar ↔ Pahalgam
-   */
+    if (entry && typeof entry === 'object') {
+      const price = Number(entry[vehicleId] || 0)
 
-  if (
-    isRoute(
-      fromPlace,
-      toPlace,
-      'srinagar',
-      'pahalgam',
-    )
-  ) {
-    return Number(
-      catalog.prices?.[1]?.[
-        'pahalgam'
-      ]?.[
-        vehicleId
-      ] || 0,
-    )
+      if (price > 0) {
+        return price
+      }
+    }
   }
-
-
-  /*
-   * Srinagar ↔ Sonamarg
-   */
-
-  if (
-    isRoute(
-      fromPlace,
-      toPlace,
-      'srinagar',
-      'sonamarg',
-    )
-  ) {
-    return Number(
-      catalog.prices?.[1]?.[
-        'sonamarg'
-      ]?.[
-        vehicleId
-      ] || 0,
-    )
-  }
-
-
-  /*
-   * No matching route.
-   */
 
   return 0
 }
@@ -267,45 +134,48 @@ function getSingleDayPrice({
 
 /*
 |--------------------------------------------------------------------------
-| ROUTE HELPER
+| getPackagePrice — price for a multi-day package
 |--------------------------------------------------------------------------
 */
+export function getPackagePrice(prices, days, vehicleId) {
+  if (!prices || !vehicleId) {
+    return 0
+  }
 
-function isRoute(
-  from,
-  to,
-  placeA,
-  placeB,
-) {
-  return (
-    (
-      from === placeA &&
-      to === placeB
-    ) ||
-    (
-      from === placeB &&
-      to === placeA
-    )
+  return Number(
+    prices?.[Number(days)]?.[vehicleId] || 0,
   )
 }
 
 
 /*
 |--------------------------------------------------------------------------
-| FORMAT INR
+| getFare — unified fare for a booking
 |--------------------------------------------------------------------------
 */
+export function getFare({ prices, days, from, to, vehicleId }) {
+  const numberOfDays = Number(days || 1)
 
-export const formatINR = (
-  amount,
-) =>
-  new Intl.NumberFormat(
-    'en-IN',
-    {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0,
-    },
-  ).format(
-    Number(amount || 0),
-  )
+  const price =
+    numberOfDays === 1
+      ? getSingleDayPrice(prices, from, to, vehicleId)
+      : getPackagePrice(prices, numberOfDays, vehicleId)
+
+  return {
+    base: price,
+    total: price,
+  }
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| formatINR
+|--------------------------------------------------------------------------
+*/
+export const formatINR = (amount) =>
+  new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(Number(amount || 0))

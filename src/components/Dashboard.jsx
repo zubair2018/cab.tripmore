@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react'
-import { signInWithEmailAndPassword } from 'firebase/auth'
 
 import { vehicles } from '../data/vehicles'
-import { formatINR } from '../utils/calculateFare'
-import { auth, isFirebaseConfigured } from '../services/firebase'
-import {defaultCatalog, saveCatalog, subscribeToCatalog} from '../services/catalog'
+import {
+  formatINR,
+  placeKey,
+  destinationPlaces,
+} from '../utils/calculateFare'
+import { defaultCatalog, saveCatalog, subscribeToCatalog } from '../services/catalog'
+import {
+  deleteBooking,
+  setBookingCancelled,
+  setBookingPaid,
+} from '../services/bookings'
 
 import '../styles/catalog.css'
 
@@ -12,6 +19,8 @@ export default function Dashboard({ bookings = [], onBack }) {
   const [catalog, setCatalog] = useState(defaultCatalog)
   const [catalogError, setCatalogError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [actionError, setActionError] = useState('')
+  const [busyId, setBusyId] = useState('')
 
   useEffect(() => {
     return subscribeToCatalog(
@@ -23,10 +32,6 @@ export default function Dashboard({ bookings = [], onBack }) {
     )
   }, [])
 
-  if (isFirebaseConfigured && !auth?.currentUser) {
-    return <DashboardLogin onBack={onBack} />
-  }
-
   const totalValue = bookings.reduce(
     (sum, booking) => sum + Number(booking.fare?.total || 0),
     0
@@ -36,12 +41,28 @@ export default function Dashboard({ bookings = [], onBack }) {
     .filter(
       (booking) =>
         (booking.payment?.status || booking.paymentStatus || '').toUpperCase() ===
-        'PAID'
+          'PAID' &&
+        (booking.bookingStatus || '').toUpperCase() !== 'CANCELLED'
     )
     .reduce(
       (sum, booking) => sum + Number(booking.fare?.total || 0),
       0
     )
+
+  async function runBookingAction(bookingId, action) {
+    try {
+      setActionError('')
+      setBusyId(bookingId)
+      await action()
+    } catch (error) {
+      console.error('Could not update booking.', error)
+      setActionError(
+        'Could not update the booking. Check your Firebase rules and try again.',
+      )
+    } finally {
+      setBusyId('')
+    }
+  }
 
   async function updateCatalog(nextCatalog) {
     try {
@@ -116,12 +137,6 @@ export default function Dashboard({ bookings = [], onBack }) {
       name,
       origin: form.origin,
       destination: form.destination,
-      prices: {
-        sedan: Number(form.sedan || 0),
-        innova: Number(form.innova || 0),
-        tempo: Number(form.tempo || 0),
-        urbania: Number(form.urbania || 0),
-      },
     }
 
     await updateCatalog({
@@ -130,21 +145,17 @@ export default function Dashboard({ bookings = [], onBack }) {
     })
   }
 
-  async function updateTourPrices(tourId, prices) {
-    await updateCatalog({
-      ...catalog,
-      tours: catalog.tours.map((tour) =>
-        tour.id === tourId
-          ? { ...tour, prices: { ...tour.prices, ...prices } }
-          : tour
-      ),
-    })
-  }
-
   async function deleteTour(tourId) {
     await updateCatalog({
       ...catalog,
       tours: catalog.tours.filter((tour) => tour.id !== tourId),
+    })
+  }
+
+  async function savePrices(nextPrices) {
+    await updateCatalog({
+      ...catalog,
+      prices: nextPrices,
     })
   }
 
@@ -180,6 +191,8 @@ export default function Dashboard({ bookings = [], onBack }) {
           <span>{bookings.length} records</span>
         </div>
 
+        {actionError && <div className="catalog-error">{actionError}</div>}
+
         {bookings.length === 0 ? (
           <EmptyState />
         ) : (
@@ -192,26 +205,65 @@ export default function Dashboard({ bookings = [], onBack }) {
                   <th>Journey</th>
                   <th>Fare</th>
                   <th>Payment</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
 
               <tbody>
-                {bookings.map((booking) => (
-                  <BookingRow key={booking.id} booking={booking} />
-                ))}
+                {bookings.map((booking) => {
+                  const paid =
+                    (booking.payment?.status || booking.paymentStatus || '')
+                      .toUpperCase() === 'PAID'
+
+                  return (
+                    <BookingRow
+                      key={booking.id}
+                      booking={booking}
+                      busy={busyId === booking.id}
+                      onSetPaid={(next) =>
+                        runBookingAction(booking.id, () =>
+                          setBookingPaid(booking.id, next),
+                        )
+                      }
+                      onSetCancelled={(next) =>
+                        runBookingAction(booking.id, () =>
+                          setBookingCancelled(booking.id, next, paid),
+                        )
+                      }
+                      onDelete={() =>
+                        runBookingAction(booking.id, () =>
+                          deleteBooking(booking.id),
+                        )
+                      }
+                    />
+                  )
+                })}
               </tbody>
             </table>
           </div>
         )}
       </section>
 
+      <PricingManager
+        catalog={catalog}
+        saving={saving}
+        onSave={savePrices}
+      />
+
       <section className="dashboard-section">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">TOURS & PRICES</p>
-            <h2>Manage day tours</h2>
+            <p className="eyebrow">DAY TOUR ROUTES</p>
+            <h2>Homepage day tours</h2>
           </div>
+          <span>{catalog.tours.length} routes</span>
         </div>
+
+        <p className="catalog-hint">
+          These routes appear in the "Popular day tours" strip on the homepage.
+          Fares are taken from the transport prices above, so there is nothing
+          to price here.
+        </p>
 
         <AddTourForm
           places={catalog.places}
@@ -226,23 +278,33 @@ export default function Dashboard({ bookings = [], onBack }) {
                 <th>Day tour</th>
                 <th>From</th>
                 <th>To</th>
-                {vehicles.map((vehicle) => (
-                  <th key={vehicle.id}>{vehicle.name}</th>
-                ))}
                 <th>Action</th>
               </tr>
             </thead>
 
             <tbody>
-              {catalog.tours.map((tour) => (
-                <TourPriceRow
-                  key={tour.id}
-                  tour={tour}
-                  saving={saving}
-                  onSave={updateTourPrices}
-                  onDelete={deleteTour}
-                />
-              ))}
+              {catalog.tours.length === 0 ? (
+                <tr>
+                  <td colSpan={4}>No day tours yet.</td>
+                </tr>
+              ) : (
+                catalog.tours.map((tour) => (
+                  <tr key={tour.id}>
+                    <td><strong>{tour.name}</strong></td>
+                    <td>{tour.origin || 'Srinagar'}</td>
+                    <td>{tour.destination}</td>
+                    <td>
+                      <button
+                        className="catalog-delete"
+                        disabled={saving}
+                        onClick={() => deleteTour(tour.id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -258,16 +320,23 @@ export default function Dashboard({ bookings = [], onBack }) {
   )
 }
 
-function BookingRow({ booking }) {
-  const paymentStatus =
+function BookingRow({ booking, busy, onSetPaid, onSetCancelled, onDelete }) {
+  const paymentStatus = (
     booking.payment?.status ||
     booking.paymentStatus ||
     'PENDING'
+  ).toUpperCase()
 
-  const isPaid = paymentStatus.toUpperCase() === 'PAID'
+  const isPaid = paymentStatus === 'PAID'
+
+  const bookingStatus = (
+    booking.bookingStatus || 'PENDING_PAYMENT'
+  ).toUpperCase()
+
+  const isCancelled = bookingStatus === 'CANCELLED'
 
   return (
-    <tr>
+    <tr className={isCancelled ? 'booking-row-cancelled' : undefined}>
       <td>
         <strong>{booking.bookingReference || booking.id}</strong>
         <small>{formatDate(booking.createdAt)}</small>
@@ -283,7 +352,7 @@ function BookingRow({ booking }) {
       </td>
 
       <td>
-        <strong>{booking.tour?.name || 'Journey unavailable'}</strong>
+        <strong>{describeJourney(booking)}</strong>
         <small>
           {booking.vehicle?.name || 'Vehicle unavailable'} · {booking.days || 1} days
         </small>
@@ -294,12 +363,91 @@ function BookingRow({ booking }) {
       </td>
 
       <td>
-        <span className={`status-badge ${isPaid ? 'complete' : 'pending'}`}>
+        <span
+          className={`status-badge ${
+            isCancelled ? 'cancelled' : isPaid ? 'complete' : 'pending'
+          }`}
+        >
           {paymentStatus}
         </span>
+        <small>{formatBookingStatus(bookingStatus)}</small>
+      </td>
+
+      <td>
+        <div className="booking-actions">
+          {!isCancelled &&
+            (isPaid ? (
+              <button
+                className="row-action"
+                type="button"
+                disabled={busy}
+                onClick={() => onSetPaid(false)}
+              >
+                Mark unpaid
+              </button>
+            ) : (
+              <button
+                className="row-action primary"
+                type="button"
+                disabled={busy}
+                onClick={() => onSetPaid(true)}
+              >
+                Mark paid
+              </button>
+            ))}
+
+          {isCancelled ? (
+            <button
+              className="row-action"
+              type="button"
+              disabled={busy}
+              onClick={() => onSetCancelled(false)}
+            >
+              Reopen
+            </button>
+          ) : (
+            <button
+              className="row-action"
+              type="button"
+              disabled={busy}
+              onClick={() => onSetCancelled(true)}
+            >
+              Cancel
+            </button>
+          )}
+
+          <button
+            className="row-action danger"
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              if (
+                window.confirm(
+                  'Delete this booking permanently? This cannot be undone.',
+                )
+              ) {
+                onDelete()
+              }
+            }}
+          >
+            Delete
+          </button>
+        </div>
       </td>
     </tr>
   )
+}
+
+function formatBookingStatus(status) {
+  switch (status) {
+    case 'CONFIRMED':
+      return 'Confirmed'
+    case 'CANCELLED':
+      return 'Cancelled'
+    case 'PENDING_PAYMENT':
+    default:
+      return 'Pending payment'
+  }
 }
 
 function PlacesManager({ places, saving, onAdd, onDelete }) {
@@ -356,10 +504,6 @@ function AddTourForm({ places, saving, onAdd }) {
     name: '',
     origin: places[0] || 'Srinagar',
     destination: places[1] || 'Pahalgam',
-    sedan: '',
-    innova: '',
-    tempo: '',
-    urbania: '',
   })
 
   function update(field, value) {
@@ -374,10 +518,6 @@ function AddTourForm({ places, saving, onAdd }) {
       name: '',
       origin: places[0] || 'Srinagar',
       destination: places[1] || 'Pahalgam',
-      sedan: '',
-      innova: '',
-      tempo: '',
-      urbania: '',
     })
   }
 
@@ -411,21 +551,6 @@ function AddTourForm({ places, saving, onAdd }) {
         </label>
       </div>
 
-      <div className="catalog-price-grid">
-        {['sedan', 'innova', 'tempo', 'urbania'].map((type) => (
-          <label key={type}>
-            {type === 'tempo' ? 'Tempo Traveller' : type[0].toUpperCase() + type.slice(1)}
-            <input
-              type="number"
-              min="0"
-              value={form[type]}
-              onChange={(e) => update(type, e.target.value)}
-              required
-            />
-          </label>
-        ))}
-      </div>
-
       <button className="button button-primary" disabled={saving}>
         + Add day tour
       </button>
@@ -433,56 +558,240 @@ function AddTourForm({ places, saving, onAdd }) {
   )
 }
 
-function TourPriceRow({ tour, saving, onSave, onDelete }) {
-  const [prices, setPrices] = useState(tour.prices || {})
+// ============================================================================
+// PRICING MANAGER
+// ============================================================================
+//
+// Edits the REAL price store (catalog.prices) that the booking flow reads:
+//
+//   prices[1][destinationSlug][vehicleId]  -> single-day fares
+//   prices[days][vehicleId]                -> multi-day packages (days >= 2)
+//
+// Changes are held locally until "Save all prices" writes the whole store.
+// ============================================================================
+
+function clonePrices(source) {
+  const result = {}
+
+  Object.keys(source || {}).forEach((day) => {
+    const dayValue = source[day]
+
+    if (dayValue && typeof dayValue === 'object') {
+      const inner = {}
+
+      Object.keys(dayValue).forEach((key) => {
+        const cell = dayValue[key]
+        inner[key] =
+          cell && typeof cell === 'object' ? { ...cell } : cell
+      })
+
+      result[day] = inner
+    } else {
+      result[day] = dayValue
+    }
+  })
+
+  return result
+}
+
+function PricingManager({ catalog, saving, onSave }) {
+  const [prices, setPrices] = useState(() => clonePrices(catalog.prices))
 
   useEffect(() => {
-    setPrices(tour.prices || {})
-  }, [tour.prices])
+    setPrices(clonePrices(catalog.prices))
+  }, [catalog.prices])
+
+  const destinations = destinationPlaces(catalog.places)
+
+  const packageDays = Object.keys(prices || {})
+    .map(Number)
+    .filter((n) => Number.isInteger(n) && n >= 2)
+    .sort((a, b) => a - b)
+
+  function setSingleDay(destKey, vehicleId, value) {
+    setPrices((old) => {
+      const dayOne = { ...(old[1] || {}) }
+      const cell = { ...(dayOne[destKey] || {}) }
+      cell[vehicleId] = Number(value) || 0
+      dayOne[destKey] = cell
+      return { ...old, 1: dayOne }
+    })
+  }
+
+  function setPackage(day, vehicleId, value) {
+    setPrices((old) => {
+      const dayObj = { ...(old[day] || {}) }
+      dayObj[vehicleId] = Number(value) || 0
+      return { ...old, [day]: dayObj }
+    })
+  }
+
+  function addDay() {
+    setPrices((old) => {
+      const existing = Object.keys(old)
+        .map(Number)
+        .filter((n) => Number.isInteger(n) && n >= 2)
+
+      const next = existing.length ? Math.max(...existing) + 1 : 2
+
+      const seed = {}
+      vehicles.forEach((vehicle) => {
+        seed[vehicle.id] = 0
+      })
+
+      return { ...old, [next]: seed }
+    })
+  }
+
+  function removeDay(day) {
+    setPrices((old) => {
+      const copy = { ...old }
+      delete copy[day]
+      return copy
+    })
+  }
 
   return (
-    <tr>
-      <td><strong>{tour.name}</strong></td>
-      <td>{tour.origin || 'Srinagar'}</td>
-      <td>{tour.destination}</td>
-
-      {vehicles.map((vehicle) => (
-        <td key={vehicle.id}>
-          <input
-            className="catalog-price-input"
-            type="number"
-            min="0"
-            value={prices[vehicle.id] || 0}
-            onChange={(e) =>
-              setPrices((old) => ({
-                ...old,
-                [vehicle.id]: Number(e.target.value),
-              }))
-            }
-          />
-        </td>
-      ))}
-
-      <td>
-        <div className="catalog-actions">
-          <button
-            className="button button-primary"
-            disabled={saving}
-            onClick={() => onSave(tour.id, prices)}
-          >
-            Save
-          </button>
-
-          <button
-            className="catalog-delete"
-            disabled={saving}
-            onClick={() => onDelete(tour.id)}
-          >
-            Delete
-          </button>
+    <section className="dashboard-section">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">TRANSPORT PRICES</p>
+          <h2>Fares &amp; packages</h2>
         </div>
-      </td>
-    </tr>
+
+        <button
+          className="button button-primary"
+          disabled={saving}
+          onClick={() => onSave(prices)}
+        >
+          {saving ? 'Saving…' : 'Save all prices'}
+        </button>
+      </div>
+
+      <h3 className="catalog-subheading">Single-day fares</h3>
+      <p className="catalog-hint">
+        Price per destination for a one-day trip. Fares are the same in both
+        directions (Srinagar → Gulmarg and Gulmarg → Srinagar). Leave a cell at
+        0 to mark that vehicle as unavailable for the destination.
+      </p>
+
+      <div className="dashboard-scroll">
+        <table className="dashboard-table">
+          <thead>
+            <tr>
+              <th>Destination</th>
+              {vehicles.map((vehicle) => (
+                <th key={vehicle.id}>{vehicle.name}</th>
+              ))}
+            </tr>
+          </thead>
+
+          <tbody>
+            {destinations.length === 0 ? (
+              <tr>
+                <td colSpan={vehicles.length + 1}>
+                  Add a place first — every place except Srinagar becomes a
+                  priceable destination.
+                </td>
+              </tr>
+            ) : (
+              destinations.map((destination) => {
+                const key = placeKey(destination)
+
+                return (
+                  <tr key={key}>
+                    <td><strong>{destination}</strong></td>
+
+                    {vehicles.map((vehicle) => (
+                      <td key={vehicle.id}>
+                        <input
+                          className="catalog-price-input"
+                          type="number"
+                          min="0"
+                          value={prices?.[1]?.[key]?.[vehicle.id] ?? 0}
+                          onChange={(e) =>
+                            setSingleDay(key, vehicle.id, e.target.value)
+                          }
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                )
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <h3 className="catalog-subheading">Multi-day packages</h3>
+      <p className="catalog-hint">
+        Fixed package price by number of days and vehicle, independent of the
+        route. Use "Add another day package" to extend the range.
+      </p>
+
+      <div className="dashboard-scroll">
+        <table className="dashboard-table">
+          <thead>
+            <tr>
+              <th>Duration</th>
+              {vehicles.map((vehicle) => (
+                <th key={vehicle.id}>{vehicle.name}</th>
+              ))}
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {packageDays.length === 0 ? (
+              <tr>
+                <td colSpan={vehicles.length + 2}>
+                  No multi-day packages yet. Add one below.
+                </td>
+              </tr>
+            ) : (
+              packageDays.map((day) => (
+                <tr key={day}>
+                  <td><strong>{day} days</strong></td>
+
+                  {vehicles.map((vehicle) => (
+                    <td key={vehicle.id}>
+                      <input
+                        className="catalog-price-input"
+                        type="number"
+                        min="0"
+                        value={prices?.[day]?.[vehicle.id] ?? 0}
+                        onChange={(e) =>
+                          setPackage(day, vehicle.id, e.target.value)
+                        }
+                      />
+                    </td>
+                  ))}
+
+                  <td>
+                    <button
+                      className="catalog-delete"
+                      disabled={saving}
+                      onClick={() => removeDay(day)}
+                    >
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <button
+        className="button button-secondary"
+        type="button"
+        disabled={saving}
+        onClick={addDay}
+      >
+        + Add another day package
+      </button>
+    </section>
   )
 }
 
@@ -505,6 +814,24 @@ function EmptyState() {
   )
 }
 
+function describeJourney(booking) {
+  const legs = Array.isArray(booking.routes)
+    ? booking.routes
+        .filter((route) => route && (route.from || route.to))
+        .map((route) => `${route.from || '—'} → ${route.to || '—'}`)
+    : []
+
+  if (legs.length > 0) {
+    return legs.join('  ·  ')
+  }
+
+  if (booking.tour?.name) {
+    return booking.tour.name
+  }
+
+  return 'Journey unavailable'
+}
+
 function formatDate(value) {
   if (!value) return 'Date unavailable'
 
@@ -513,64 +840,4 @@ function formatDate(value) {
   return Number.isNaN(date.getTime())
     ? 'Date unavailable'
     : date.toLocaleString('en-IN')
-}
-
-function DashboardLogin({ onBack }) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-
-  async function login(event) {
-    event.preventDefault()
-    setError('')
-
-    try {
-      await signInWithEmailAndPassword(auth, email, password)
-      window.location.reload()
-    } catch {
-      setError('Login failed. Check the company email and password.')
-    }
-  }
-
-  return (
-    <main className="dashboard-login-page">
-      <form className="dashboard-login" onSubmit={login}>
-        <p className="eyebrow">TRIPMORE OPERATIONS</p>
-        <h1>Company dashboard</h1>
-        <p>Sign in to manage bookings, places and prices.</p>
-
-        <label>
-          Email address
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </label>
-
-        <label>
-          Password
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </label>
-
-        {error && <p className="login-error">{error}</p>}
-
-        <button className="button button-primary">Sign in</button>
-
-        <button
-          className="button button-secondary"
-          type="button"
-          onClick={onBack}
-        >
-          Back to website
-        </button>
-      </form>
-    </main>
-  )
 }

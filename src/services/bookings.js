@@ -1,10 +1,13 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
+  doc,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
+  updateDoc,
 } from 'firebase/firestore'
 
 import { db } from './firebase'
@@ -274,4 +277,82 @@ export function subscribeToBookings(
     },
     onError,
   )
+}
+
+
+/*
+ * ==========================================
+ * ADMIN BOOKING ACTIONS
+ * ==========================================
+ *
+ * Update or remove a booking from the dashboard. The dashboard listens to
+ * bookings in real time (subscribeToBookings), so these changes appear
+ * immediately without a manual refresh.
+ */
+
+function bookingDoc(bookingId) {
+  return db && bookingId
+    ? doc(db, 'bookings', bookingId)
+    : null
+}
+
+async function updateBooking(bookingId, updates) {
+  const reference = bookingDoc(bookingId)
+
+  if (!reference) {
+    return
+  }
+
+  await updateDoc(reference, updates)
+}
+
+/*
+ * Mark a booking paid, or undo it. Paying implies the booking is confirmed;
+ * undoing returns it to pending payment. gateway = 'MANUAL' flags a payment
+ * the admin recorded by hand (versus the online gateway added later).
+ */
+export async function setBookingPaid(bookingId, paid) {
+  return updateBooking(
+    bookingId,
+    paid
+      ? {
+          'payment.status': 'PAID',
+          'payment.gateway': 'MANUAL',
+          'payment.paidAt': serverTimestamp(),
+          bookingStatus: 'CONFIRMED',
+        }
+      : {
+          'payment.status': 'PENDING',
+          'payment.gateway': null,
+          'payment.paidAt': null,
+          bookingStatus: 'PENDING_PAYMENT',
+        },
+  )
+}
+
+/*
+ * Cancel a booking, or reopen it. Reopening restores CONFIRMED when the
+ * booking is already paid, otherwise PENDING_PAYMENT.
+ */
+export async function setBookingCancelled(bookingId, cancelled, paid) {
+  return updateBooking(bookingId, {
+    bookingStatus: cancelled
+      ? 'CANCELLED'
+      : paid
+        ? 'CONFIRMED'
+        : 'PENDING_PAYMENT',
+  })
+}
+
+/*
+ * Permanently remove a booking (for spam or test entries).
+ */
+export async function deleteBooking(bookingId) {
+  const reference = bookingDoc(bookingId)
+
+  if (!reference) {
+    return
+  }
+
+  await deleteDoc(reference)
 }

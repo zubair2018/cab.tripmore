@@ -17,52 +17,75 @@ import {
 // DEFAULT PRICES
 // ============================================================================
 
+// Single-day fares are keyed by the DESTINATION place slug (the non-Srinagar
+// endpoint). Pricing is bidirectional. Multi-day entries (2+) are packages
+// keyed by number of days. These are starting values — the admin dashboard
+// is the source of truth and overrides them. All four vehicles are priced so
+// every vehicle is bookable out of the box (review these in the dashboard).
 const defaultPrices = {
   1: {
     gulmarg: {
       sedan: 3500,
       innova: 4000,
+      tempo: 6000,
+      urbania: 7500,
     },
 
     pahalgam: {
       sedan: 3500,
       innova: 4000,
+      tempo: 6000,
+      urbania: 7500,
     },
 
     sonamarg: {
       sedan: 3500,
       innova: 4000,
+      tempo: 6000,
+      urbania: 7500,
     },
 
-    'srinagar-local': {
+    'srinagar-local-sightseeing': {
       sedan: 3000,
       innova: 3500,
+      tempo: 5000,
+      urbania: 6500,
     },
 
     airport: {
       sedan: 1500,
       innova: 2000,
+      tempo: 3000,
+      urbania: 4000,
     },
   },
 
   2: {
     sedan: 6000,
     innova: 7000,
+    tempo: 10000,
+    urbania: 13000,
   },
 
   3: {
     sedan: 9000,
     innova: 10500,
+    tempo: 15000,
+    urbania: 19000,
   },
 
   4: {
     sedan: 12000,
     innova: 14000,
+    tempo: 20000,
+    urbania: 25000,
   },
 
   5: {
     sedan: 15000,
     innova: 17000,
+    tempo: 25000,
+    urbania: 31000,
   },
 }
 
@@ -93,50 +116,6 @@ export const defaultCatalog = {
 const catalogRef = db
   ? doc(db, 'settings', 'catalog')
   : null
-
-
-// ============================================================================
-// MERGE PRICES
-// ============================================================================
-
-function mergePrices(defaults, saved) {
-  const result = {
-    ...defaults,
-  }
-
-  Object.keys(saved || {}).forEach((day) => {
-    const savedDay = saved[day]
-
-    if (
-      !savedDay ||
-      typeof savedDay !== 'object'
-    ) {
-      return
-    }
-
-    result[day] = {
-      ...(result[day] || {}),
-      ...savedDay,
-    }
-
-    Object.keys(savedDay).forEach((key) => {
-      const savedValue = savedDay[key]
-
-      if (
-        savedValue &&
-        typeof savedValue === 'object' &&
-        !Array.isArray(savedValue)
-      ) {
-        result[day][key] = {
-          ...(result[day]?.[key] || {}),
-          ...savedValue,
-        }
-      }
-    })
-  })
-
-  return result
-}
 
 
 // ============================================================================
@@ -258,14 +237,19 @@ function normalizeCatalog(data) {
   // ----------------------------------------------------------
   // Prices
   // ----------------------------------------------------------
+  //
+  // Once a catalog document exists, its saved prices are the
+  // source of truth (same model as places). We DO NOT merge
+  // defaults over them, so removing a package day or a
+  // destination in the dashboard actually sticks. Defaults are
+  // only the fallback when no prices have ever been saved.
+  // ----------------------------------------------------------
 
   const prices =
     source.prices &&
-    typeof source.prices === 'object'
-      ? mergePrices(
-          defaultCatalog.prices,
-          source.prices,
-        )
+    typeof source.prices === 'object' &&
+    Object.keys(source.prices).length > 0
+      ? source.prices
       : defaultCatalog.prices
 
 

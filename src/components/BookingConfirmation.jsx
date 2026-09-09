@@ -1,4 +1,8 @@
+import { useState } from 'react'
+
 import { formatINR } from '../utils/calculateFare'
+import { isFirebaseConfigured } from '../services/firebase'
+import { payForBooking } from '../services/payments'
 import '../styles/booking-confirmation.css'
 
 export default function BookingConfirmation({
@@ -25,6 +29,48 @@ export default function BookingConfirmation({
     booking?.id ||
     'Pending'
 
+  const alreadyPaid =
+    (booking?.payment?.status || booking?.paymentStatus || '')
+      .toString()
+      .toUpperCase() === 'PAID'
+
+  // idle | processing | paid
+  const [payState, setPayState] = useState(
+    alreadyPaid ? 'paid' : 'idle',
+  )
+  const [payError, setPayError] = useState('')
+
+  // Online payment only makes sense once the booking is really in Firebase
+  // (so it has an id the backend can look up) and there is an amount to charge.
+  const canPay =
+    isFirebaseConfigured &&
+    Boolean(booking?.id) &&
+    fare > 0 &&
+    payState !== 'paid'
+
+  async function handlePay() {
+    setPayError('')
+    setPayState('processing')
+
+    try {
+      const result = await payForBooking(booking)
+
+      if (result.status === 'PAID') {
+        setPayState('paid')
+      } else {
+        // Customer dismissed the payment window — let them try again.
+        setPayState('idle')
+      }
+    } catch (error) {
+      console.error('Could not complete payment.', error)
+      setPayError(
+        error.message ||
+          'Payment could not be completed. Please try again.',
+      )
+      setPayState('idle')
+    }
+  }
+
   return (
     <main className="confirmation-page">
       <div className="confirmation-shell">
@@ -34,7 +80,9 @@ export default function BookingConfirmation({
         </span>
 
         <p className="eyebrow">
-          BOOKING REQUEST RECEIVED
+          {payState === 'paid'
+            ? 'PAYMENT RECEIVED'
+            : 'BOOKING REQUEST RECEIVED'}
         </p>
 
         <h1>
@@ -42,8 +90,9 @@ export default function BookingConfirmation({
         </h1>
 
         <p className="confirmation-copy">
-          Your Tripmore team will confirm your
-          transport booking shortly.
+          {payState === 'paid'
+            ? 'Your payment is confirmed and a receipt has been emailed to you. Your Tripmore team will be in touch with the final trip details.'
+            : 'Your Tripmore team will confirm your transport booking shortly.'}
         </p>
 
         <div className="confirmation-card">
@@ -110,16 +159,50 @@ export default function BookingConfirmation({
 
         </div>
 
+        {/* PAYMENT */}
+        {(canPay || payState === 'paid') && (
+          <div className="confirmation-payment">
+            {payState === 'paid' ? (
+              <p className="payment-paid">
+                <span aria-hidden="true">✓</span>
+                Payment received — your booking is confirmed.
+              </p>
+            ) : (
+              <>
+                <button
+                  className="payment-button"
+                  type="button"
+                  disabled={payState === 'processing'}
+                  onClick={handlePay}
+                >
+                  {payState === 'processing'
+                    ? 'Opening secure payment…'
+                    : `Pay ${formatINR(fare)} securely →`}
+                </button>
+
+                <small>
+                  Secure payment by Razorpay · UPI, cards &amp; netbanking
+                </small>
+
+                {payError && (
+                  <p className="payment-error">
+                    {payError}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
         <div className="confirmation-note">
           <strong>
             What happens next?
           </strong>
 
           <p>
-            Our team will review your booking
-            and contact you on WhatsApp or
-            email to confirm vehicle availability
-            and the booking details.
+            {payState === 'paid'
+              ? 'Your team will reach out on WhatsApp or email with your pickup time and driver details.'
+              : 'Our team will review your booking and contact you on WhatsApp or email to confirm vehicle availability and the booking details.'}
           </p>
         </div>
 

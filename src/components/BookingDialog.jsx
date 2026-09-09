@@ -11,6 +11,9 @@ import {
 
 import {
   formatINR,
+  getPackagePrice,
+  getSingleDayPrice,
+  maxPackageDays,
 } from '../utils/calculateFare'
 
 import '../styles/booking-dialog.css'
@@ -22,293 +25,14 @@ import '../styles/booking-dialog.css'
 |--------------------------------------------------------------------------
 */
 
-function makeRoutes(days) {
+function makeRoutes(days, firstDestination = '') {
   return Array.from(
     { length: days },
-    () => ({
-      from: '',
-      to: '',
-    }),
+    (_, index) =>
+      index === 0 && firstDestination
+        ? { from: 'Srinagar', to: firstDestination }
+        : { from: '', to: '' },
   )
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Normalize place name
-|--------------------------------------------------------------------------
-|
-| Converts:
-|
-| Srinagar
-| srinagar
-|  Srinagar
-|
-| into the same comparison value.
-|
-|--------------------------------------------------------------------------
-*/
-
-function normalizePlace(place) {
-  return String(place || '')
-    .trim()
-    .toLowerCase()
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Find route price
-|--------------------------------------------------------------------------
-|
-| For one-day journeys:
-|
-| catalog.prices[1] contains:
-|
-| {
-|   gulmarg: {
-|     sedan: 3500,
-|     innova: 4000
-|   },
-|   pahalgam: {
-|     ...
-|   }
-| }
-|
-| This function dynamically finds the destination key.
-|
-| Therefore, if the admin adds:
-|
-| Doodhpathri
-|
-| with:
-|
-| sedan: 4000
-| innova: 4500
-|
-| the booking dialog automatically uses it.
-|
-|--------------------------------------------------------------------------
-*/
-
-function getOneDayRoutePrice(
-  prices,
-  from,
-  to,
-  vehicleId,
-) {
-  if (
-    !prices ||
-    !vehicleId ||
-    !from ||
-    !to
-  ) {
-    return 0
-  }
-
-  const fromKey =
-    normalizePlace(from)
-
-  const toKey =
-    normalizePlace(to)
-
-  /*
-  |--------------------------------------------------------------------------
-  | Same-place route
-  |--------------------------------------------------------------------------
-  |
-  | Example:
-  |
-  | Srinagar → Srinagar
-  |
-  | Try to find a matching route using the place name.
-  |
-  |--------------------------------------------------------------------------
-  */
-
-  const dayOnePrices =
-    prices?.[1] || {}
-
-  /*
-  |--------------------------------------------------------------------------
-  | First: direct destination match
-  |--------------------------------------------------------------------------
-  |
-  | Example:
-  |
-  | Srinagar → Gulmarg
-  |
-  | Gulmarg → Srinagar
-  |
-  | Both use:
-  |
-  | prices[1].gulmarg
-  |
-  |--------------------------------------------------------------------------
-  */
-
-  const destinationKeys =
-    Object.keys(dayOnePrices)
-
-  for (
-    const routeKey of destinationKeys
-  ) {
-    const normalizedRouteKey =
-      normalizePlace(routeKey)
-
-    /*
-    |--------------------------------------------------------------------------
-    | Direct destination match
-    |--------------------------------------------------------------------------
-    */
-
-    if (
-      normalizedRouteKey ===
-      toKey
-    ) {
-      const routePrice =
-        dayOnePrices[
-          routeKey
-        ]
-
-      if (
-        routePrice &&
-        typeof routePrice === 'object'
-      ) {
-        return Number(
-          routePrice?.[
-            vehicleId
-          ] || 0,
-        )
-      }
-    }
-  }
-
-  /*
-  |--------------------------------------------------------------------------
-  | Special handling for Srinagar Local Sightseeing
-  |--------------------------------------------------------------------------
-  |
-  | The dashboard may store it as:
-  |
-  | srinagar-local
-  |
-  | while the place selector displays:
-  |
-  | Srinagar Local Sightseeing
-  |
-  |--------------------------------------------------------------------------
-  */
-
-  if (
-    toKey ===
-      'srinagar local sightseeing' ||
-    toKey ===
-      'srinagar-local'
-  ) {
-    const localPrice =
-      dayOnePrices?.[
-        'srinagar-local'
-      ]
-
-    if (
-      localPrice &&
-      typeof localPrice === 'object'
-    ) {
-      return Number(
-        localPrice?.[
-          vehicleId
-        ] || 0,
-      )
-    }
-  }
-
-  /*
-  |--------------------------------------------------------------------------
-  | Airport is normally bidirectional
-  |--------------------------------------------------------------------------
-  |
-  | Srinagar → Airport
-  |
-  | Airport → Srinagar
-  |
-  | both use:
-  |
-  | prices[1].airport
-  |
-  |--------------------------------------------------------------------------
-  */
-
-  if (
-    fromKey === 'airport' ||
-    toKey === 'airport'
-  ) {
-    const airportPrice =
-      dayOnePrices?.airport
-
-    if (
-      airportPrice &&
-      typeof airportPrice === 'object'
-    ) {
-      return Number(
-        airportPrice?.[
-          vehicleId
-        ] || 0,
-      )
-    }
-  }
-
-  /*
-  |--------------------------------------------------------------------------
-  | Reverse journey support
-  |--------------------------------------------------------------------------
-  |
-  | If the selected route is:
-  |
-  | Gulmarg → Srinagar
-  |
-  | the price should still come from:
-  |
-  | prices[1].gulmarg
-  |
-  |--------------------------------------------------------------------------
-  */
-
-  for (
-    const routeKey of destinationKeys
-  ) {
-    const normalizedRouteKey =
-      normalizePlace(routeKey)
-
-    if (
-      normalizedRouteKey ===
-      fromKey
-    ) {
-      const routePrice =
-        dayOnePrices[
-          routeKey
-        ]
-
-      if (
-        routePrice &&
-        typeof routePrice === 'object'
-      ) {
-        return Number(
-          routePrice?.[
-            vehicleId
-          ] || 0,
-        )
-      }
-    }
-  }
-
-  /*
-  |--------------------------------------------------------------------------
-  | No configured price
-  |--------------------------------------------------------------------------
-  */
-
-  return 0
 }
 
 
@@ -322,6 +46,7 @@ export default function BookingDialog({
   onClose,
   onBook,
   error,
+  initialDestination = '',
 }) {
   const [catalog, setCatalog] =
     useState(defaultCatalog)
@@ -336,7 +61,7 @@ export default function BookingDialog({
 
   const [routes, setRoutes] =
     useState(
-      makeRoutes(1),
+      () => makeRoutes(1, initialDestination),
     )
 
   const [customer, setCustomer] =
@@ -456,25 +181,15 @@ export default function BookingDialog({
       return 0
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | One-day booking
-    |--------------------------------------------------------------------------
-    */
-
+    // One-day booking: price by the route's destination.
     if (days === 1) {
-      const route =
-        routes[0]
+      const route = routes[0]
 
-      if (
-        !route?.from ||
-        !route?.to
-      ) {
+      if (!route?.from || !route?.to) {
         return 0
       }
 
-      return getOneDayRoutePrice(
+      return getSingleDayPrice(
         catalog.prices,
         route.from,
         route.to,
@@ -482,25 +197,11 @@ export default function BookingDialog({
       )
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Multiple-day package
-    |--------------------------------------------------------------------------
-    |
-    | For 2+ days the price is based on:
-    |
-    | number of days + vehicle
-    |
-    |--------------------------------------------------------------------------
-    */
-
-    return Number(
-      catalog.prices?.[
-        days
-      ]?.[
-        selectedVehicle.id
-      ] || 0,
+    // Multi-day booking: package price by day count + vehicle.
+    return getPackagePrice(
+      catalog.prices,
+      days,
+      selectedVehicle.id,
     )
   }
 
@@ -538,11 +239,16 @@ export default function BookingDialog({
   function changeDays(
     nextDays,
   ) {
+    const maxDays = Math.max(
+      1,
+      maxPackageDays(catalog?.prices),
+    )
+
     const newDays =
       Math.max(
         1,
         Math.min(
-          14,
+          maxDays,
           nextDays,
         ),
       )
@@ -737,21 +443,6 @@ export default function BookingDialog({
       routes,
 
       fare,
-
-      paymentStatus:
-        'Pending',
-
-      customerEmailStatus:
-        'Pending',
-
-      customerWhatsappStatus:
-        'Pending',
-
-      companyEmailStatus:
-        'Pending',
-
-      companyWhatsappStatus:
-        'Pending',
 
       createdAt:
         new Date().toISOString(),

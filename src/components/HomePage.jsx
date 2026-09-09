@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { vehicles } from '../data/vehicles'
+import { destinationPlaces, placeKey } from '../utils/calculateFare'
 import { defaultCatalog, subscribeToCatalog } from '../services/catalog'
 
 const steps = [
@@ -44,6 +45,27 @@ const benefits = [
   },
 ]
 
+// Photos for the destination showcase, keyed by place slug. Places without a
+// specific photo fall back to a general Kashmir image, so destinations added
+// from the dashboard still render a card.
+const destinationPhotos = {
+  gulmarg:
+    'https://images.pexels.com/photos/27497828/pexels-photo-27497828.jpeg?auto=compress&cs=tinysrgb&w=1200',
+  pahalgam:
+    'https://images.pexels.com/photos/28805621/pexels-photo-28805621.jpeg?auto=compress&cs=tinysrgb&w=1200',
+  sonamarg:
+    'https://images.pexels.com/photos/35027239/pexels-photo-35027239.jpeg?auto=compress&cs=tinysrgb&w=1200',
+  doodhpathri:
+    'https://images.pexels.com/photos/15432747/pexels-photo-15432747.jpeg?auto=compress&cs=tinysrgb&w=1200',
+  'aru-valley':
+    'https://images.pexels.com/photos/29329381/pexels-photo-29329381.jpeg?auto=compress&cs=tinysrgb&w=1200',
+  'srinagar-local-sightseeing':
+    'https://images.pexels.com/photos/16498513/pexels-photo-16498513.jpeg?auto=compress&cs=tinysrgb&w=1200',
+}
+
+const DESTINATION_FALLBACK_PHOTO =
+  'https://images.pexels.com/photos/16498513/pexels-photo-16498513.jpeg?auto=compress&cs=tinysrgb&w=1200'
+
 export default function HomePage({ onBook }) {
   const [catalog, setCatalog] = useState(defaultCatalog)
 
@@ -60,6 +82,7 @@ export default function HomePage({ onBook }) {
 
   const places = catalog?.places || defaultCatalog.places || []
   const tours = catalog?.tours || defaultCatalog.tours || []
+  const destinations = destinationPlaces(places)
 
   return (
     <>
@@ -214,60 +237,71 @@ export default function HomePage({ onBook }) {
           </div>
         </section>
 
-        {/* =========================
-            DESTINATIONS
-        ========================== */}
-        <section
-          className="destinations-section"
-          id="destinations"
+          {/* =========================
+    DESTINATIONS
+========================== */}
+<section
+  className="destinations-section"
+  id="destinations"
+>
+  <div className="section-heading-large">
+    <div>
+      <p className="eyebrow">EXPLORE KASHMIR</p>
+
+      <h2>
+        Go where Kashmir
+        <br />
+        takes you.
+      </h2>
+    </div>
+
+    <p>
+      From peaceful lakes to mountain valleys,
+      discover the places that make Kashmir unforgettable.
+    </p>
+  </div>
+
+  <div className="destination-grid">
+    {destinations.map((destination, index) => {
+      const key = placeKey(destination)
+
+      return (
+        <button
+          className="destination-card"
+          type="button"
+          key={key}
+          onClick={() => onBook(destination)}
         >
-          <div className="section-heading-large">
-            <div>
-              <p className="eyebrow">EXPLORE KASHMIR</p>
+          <div className="destination-image">
+            <img
+              src={destinationPhotos[key] || DESTINATION_FALLBACK_PHOTO}
+              alt={`${destination} Kashmir`}
+              loading="lazy"
+            />
 
-              <h2>
-                Go where Kashmir
-                <br />
-                takes you.
-              </h2>
-            </div>
-
-            <p>
-              Choose a destination and let Tripmore take care
-              of the road.
-            </p>
+            <span>{String(index + 1).padStart(2, '0')}</span>
           </div>
 
-          <div className="destination-grid">
-            {places.slice(0, 6).map((place, index) => (
-              <button
-                className="destination-card"
-                key={place}
-                type="button"
-                onClick={onBook}
-              >
-                <div className={`destination-image destination-${index + 1}`}>
-                  <span>{String(index + 1).padStart(2, '0')}</span>
-                </div>
+          <div className="destination-content">
+            <h3>{destination}</h3>
 
-                <div className="destination-content">
-                  <h3>{place}</h3>
-
-                  <span>
-                    Plan your ride
-                    <strong> →</strong>
-                  </span>
-                </div>
-              </button>
-            ))}
+            <span>
+              Plan your ride
+              <strong> →</strong>
+            </span>
           </div>
+        </button>
+      )
+    })}
+  </div>
 
-          {places.length === 0 && (
-            <div className="homepage-empty">
-              <p>Destinations will appear here.</p>
-            </div>
-          )}
-        </section>
+  {destinations.length === 0 && (
+    <div className="homepage-empty">
+      <p>Destinations will appear here.</p>
+    </div>
+  )}
+</section>
+
 
         {/* =========================
             WHY TRIPMORE
@@ -448,7 +482,7 @@ export default function HomePage({ onBook }) {
                   <button
                     key={tour.id}
                     type="button"
-                    onClick={onBook}
+                    onClick={() => onBook(tour.destination)}
                     className="tour-route"
                   >
                     <span>
@@ -532,10 +566,9 @@ export default function HomePage({ onBook }) {
         </div>
 
         <div className="footer-links">
-          <a href="#destinations">Destinations</a>
-          <a href="#fleet">Fleet</a>
-          <a href="#why-tripmore">Why Tripmore</a>
-          <a href="#how-it-works">How it works</a>
+          <a href="/terms">Terms &amp; Conditions</a>
+          <a href="/disclaimer">Disclaimer</a>
+          <a href="/refund-policy">Refund Policy</a>
         </div>
 
         <div className="footer-contact">

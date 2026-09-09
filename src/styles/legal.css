@@ -1,0 +1,339 @@
+/* =========================================================
+   TRIPMORE — LEGAL PAGES
+   Terms & Conditions · Disclaimer · Refund Policy
+   Uses the global design tokens from global.css.
+   ========================================================= */
+
+.legal-page {
+  width: 100%;
+  min-height: 100vh;
+
+  background: var(--bg);
+  color: var(--text);
+}
+
+
+/* ---------------------------------------------------------
+   TOP BAR
+   --------------------------------------------------------- */
+
+.legal-topbar {
+  width: min(var(--container), calc(100% - 40px));
+
+  margin-inline: auto;
+
+  min-height: 72px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 16px;
+}
+
+.legal-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 0;
+
+  border: 0;
+  background: transparent;
+
+  color: var(--text);
+
+  font-size: 22px;
+  font-weight: 800;
+
+  letter-spacing: -0.6px;
+}
+
+.legal-brand-in {
+  color: var(--green);
+}
+
+.legal-brand-mark {
+  display: inline-grid;
+  place-items: center;
+
+  width: 26px;
+  height: 26px;
+
+  margin-right: 4px;
+
+  border-radius: 7px;
+
+  background: var(--green);
+  color: #ffffff;
+
+  font-size: 14px;
+}
+
+.legal-back-link {
+  color: var(--text-soft);
+
+  font-size: 15px;
+  font-weight: 600;
+
+  transition: color 0.2s ease;
+}
+
+.legal-back-link:hover {
+  color: var(--green);
+}
+
+
+/* ---------------------------------------------------------
+   DOCUMENT SHELL
+   --------------------------------------------------------- */
+
+.legal-shell {
+  width: min(820px, calc(100% - 40px));
+
+  margin-inline: auto;
+
+  padding: 40px 0 64px;
+}
+
+.legal-title {
+  font-size: clamp(34px, 5vw, 48px);
+
+  line-height: 1.05;
+
+  letter-spacing: -1.2px;
+
+  margin-bottom: 12px;
+}
+
+.legal-updated {
+  margin-bottom: 28px;
+
+  color: var(--text-muted);
+
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.legal-intro {
+  padding-bottom: 26px;
+  margin-bottom: 8px;
+
+  border-bottom: 1px solid var(--border);
+
+  color: var(--text-soft);
+
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+
+/* ---------------------------------------------------------
+   SECTIONS
+   --------------------------------------------------------- */
+
+.legal-section {
+  margin-top: 34px;
+}
+
+.legal-section h2,
+.legal-contact h2 {
+  margin-bottom: 12px;
+
+  font-size: 21px;
+  font-weight: 700;
+
+  line-height: 1.25;
+
+  letter-spacing: -0.3px;
+}
+
+.legal-section p,
+.legal-contact p {
+  color: var(--text-soft);
+
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.legal-section-note {
+  color: var(--text-muted);
+
+  font-size: 15px;
+  font-style: italic;
+}
+
+
+/* ---------------------------------------------------------
+   LISTS
+   --------------------------------------------------------- */
+
+.legal-list {
+  margin: 4px 0 16px;
+  padding-left: 22px;
+
+  color: var(--text-soft);
+
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.legal-list li {
+  margin-bottom: 8px;
+
+  padding-left: 4px;
+}
+
+.legal-list li::marker {
+  color: var(--green);
+}
+
+
+/* ---------------------------------------------------------
+   CONTACT CARD
+   --------------------------------------------------------- */
+
+.legal-contact {
+  margin-top: 44px;
+
+  padding: 26px 28px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  background: var(--green-light);
+}
+
+.legal-contact h2 {
+  margin-bottom: 8px;
+}
+
+.legal-contact-lines {
+  display: grid;
+  gap: 4px;
+
+  margin-top: 12px;
+  margin-bottom: 0;
+}
+
+.legal-contact-lines strong {
+  color: var(--text);
+
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.legal-contact-lines a {
+  color: var(--green-dark);
+
+  font-weight: 600;
+
+  transition: color 0.2s ease;
+}
+
+.legal-contact-lines a:hover {
+  color: var(--green);
+
+  text-decoration: underline;
+}
+
+
+/* ---------------------------------------------------------
+   ACTIONS
+   --------------------------------------------------------- */
+
+.legal-actions {
+  margin-top: 36px;
+}
+
+
+/* ---------------------------------------------------------
+   FOOTER
+   --------------------------------------------------------- */
+
+.legal-footer {
+  width: min(var(--container), calc(100% - 40px));
+
+  margin-inline: auto;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  padding: 24px 0 40px;
+
+  border-top: 1px solid var(--border);
+
+  color: var(--text-muted);
+
+  font-size: 13px;
+}
+
+.legal-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.legal-footer-links a {
+  color: var(--text-soft);
+
+  font-weight: 600;
+
+  transition: color 0.2s ease;
+}
+
+.legal-footer-links a:hover {
+  color: var(--green);
+}
+
+
+/* ---------------------------------------------------------
+   RESPONSIVE
+   --------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .legal-topbar,
+  .legal-shell,
+  .legal-footer {
+    width: calc(100% - 32px);
+  }
+}
+
+@media (max-width: 600px) {
+  .legal-topbar,
+  .legal-shell,
+  .legal-footer {
+    width: calc(100% - 32px);
+  }
+
+  .legal-back-link {
+    display: none;
+  }
+
+  .legal-shell {
+    padding: 28px 0 48px;
+  }
+
+  .legal-intro {
+    font-size: 16px;
+  }
+
+  .legal-section p,
+  .legal-contact p,
+  .legal-list {
+    font-size: 15px;
+  }
+
+  .legal-contact {
+    padding: 20px;
+  }
+
+  .legal-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

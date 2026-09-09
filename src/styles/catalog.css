@@ -376,6 +376,73 @@
   color: #92400e;
 }
 
+.status-badge.cancelled {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+/* =========================================================
+   BOOKING ROW ACTIONS
+   ========================================================= */
+
+.booking-row-cancelled {
+  opacity: 0.55;
+}
+
+.booking-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.row-action {
+  min-height: 32px;
+
+  padding: 0 10px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+
+  background: #fff;
+
+  color: #334155;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+}
+
+.row-action:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+.row-action.primary {
+  border-color: #86efac;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.row-action.primary:hover:not(:disabled) {
+  background: #dcfce7;
+}
+
+.row-action.danger {
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
+.row-action.danger:hover:not(:disabled) {
+  background: #fef2f2;
+}
+
+.row-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* =========================================================
    EMPTY STATE
    ========================================================= */
@@ -938,4 +1005,27 @@
   .dashboard-login {
     padding: 22px 17px;
   }
+}
+/* ============================================================
+   PRICING MANAGER — subheadings & hints
+   ============================================================ */
+
+.catalog-subheading {
+  margin: 28px 0 6px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #0f172a;
+}
+
+.catalog-subheading:first-of-type {
+  margin-top: 8px;
+}
+
+.catalog-hint {
+  margin: 0 0 14px;
+  max-width: 640px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #64748b;
 }
